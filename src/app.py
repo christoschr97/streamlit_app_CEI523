@@ -1,7 +1,15 @@
-import pandas as pd
 import streamlit as st
-import numpy as np
+import pandas as pd
 
+# Custom imports for pages
+from multipage import MultiPage
+import data_cleaning
+import EDA
+
+# Create an instance of the app 
+app = MultiPage()
+
+# Title of the main page
 def get_data():
     url = "https://raw.githubusercontent.com/christoschr97/CEI523-online-retail-data/master/data.csv"
     return pd.read_csv(url, encoding="ISO-8859-1")
@@ -14,16 +22,11 @@ st.markdown("Welcome to our project. The goal of this project is to user Retail 
 
 st.markdown("Here we is a sample of the raw dataset used in our assignment")
 
-st.dataframe(df[:10])
+# st.dataframe(df[:10])
 
-col1, col2 = st.columns(2)
-col1.write('This is column1')
-col2.write('This is column2')
+# Add all your applications (pages) here
+app.add_page("Exploratory Data Analysis", EDA.app)
+app.add_page("Data Cleaning", data_cleaning.app)
 
-# Add a selectbox to the sidebar:
-add_selectbox = st.sidebar.selectbox(
-    'How would you like to be contacted?',
-    ('Data Preparation', 'EDA', 'Machine Learning')
-)
-
-
+# The main app
+app.run()
