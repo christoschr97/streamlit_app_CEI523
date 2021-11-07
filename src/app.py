@@ -62,8 +62,8 @@ st.markdown("### Here we is a sample of the raw dataset used in our assignment")
 # st.dataframe(df[:10])
 
 # Add all your applications (pages) here
-app.add_page("Dataset Overview", dataset_overview.app)
 app.add_page("Data Preparation", data_cleaning.app)
+app.add_page("Dataset Overview", dataset_overview.app)
 app.add_page("Exploratory Data Analysis", EDA.app)
 
 # The main app
