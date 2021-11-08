@@ -36,7 +36,7 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 
 # Custom imports for pages
 from multipage import MultiPage
-import data_cleaning # the data cleaning file
+import data_preparation # the data cleaning file
 import EDA # the EDA File
 import dataset_overview # the dataset overview File
 
@@ -62,7 +62,7 @@ st.markdown("### Here we is a sample of the raw dataset used in our assignment")
 # st.dataframe(df[:10])
 
 # Add all your applications (pages) here
-app.add_page("Data Preparation", data_cleaning.app)
+app.add_page("Data Preparation", data_preparation.app)
 app.add_page("Dataset Overview", dataset_overview.app)
 app.add_page("Exploratory Data Analysis", EDA.app)
 
