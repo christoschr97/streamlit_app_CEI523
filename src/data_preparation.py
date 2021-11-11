@@ -38,12 +38,11 @@ def get_data():
     return pd.read_csv(url, encoding="ISO-8859-1")
 
 def app():
-    st.title("Data Preparation Section")
+    st.title("Data Preparation: Feature Engineering")
     df_cleaned = get_data()
 
     st.markdown("""
         ### Data Preparation section consits of some steps such as:
-        * 
         * Feature Engineering
     """)
 

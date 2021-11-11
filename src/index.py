@@ -43,7 +43,7 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 
 def get_data():
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    url = str(dir_path) + "/data.csv"
+    url = str(dir_path) + "/data/data.csv"
     return pd.read_csv(url, encoding="ISO-8859-1")
 df = get_data()
 
@@ -326,18 +326,22 @@ add_selectbox = st.sidebar.selectbox(
 # Now lets check the dataframe again: Seems Like we have a final dataset with 393374 rows
 # """)
 
-
-def get_data():
+#### get_data
+def get_data_cleaned():
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    url = str(dir_path) + "/data/data_cleaned.csv"
-    return pd.read_csv(url, encoding="ISO-8859-1")
+    url = str(dir_path) + "/data/data_cleaned_2.csv"
+    return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
 
-df_cleaned = get_data()
+df_cleaned = get_data_cleaned()
 
 st.markdown("""
     ### Data Preparation section consits of some steps that include:
     * Data Transformation
     * Feature Engineering
+
+    ### In this Page we will create the following categories:
+    1. Product Categories
+    2. Customer Categories
 """)
 
 st.dataframe(df_cleaned.describe())
@@ -347,9 +351,20 @@ Lets create a dataframe CartPrice which will contain the data for each transacti
 """)
 
 temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['FullPrice'].sum()
-cart_price = temp.rename(columns = {'FullPrice':'Cart Price'})
+cart_price = temp.rename(columns = {'TotalPrice':'Cart Price'})
 
 st.dataframe(cart_price)
+
+st.markdown("""
+# Understand Products: Create Product Categories
+**What do we already know about the products?**
+* Each product has a unique stockcode
+* Each product has a description which describes each product
+""")
+
+
+
+
 
 
 

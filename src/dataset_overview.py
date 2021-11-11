@@ -39,11 +39,11 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 # Title of the main page
 def get_data():
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    url = str(dir_path) + "/data.csv"
+    url = str(dir_path) + "/data/data.csv"
     return pd.read_csv(url, encoding="ISO-8859-1")
 
 def app():
-  st.title("Dataset Overview")
+  st.title("Data Preparation: Data Overview & Cleaning")
   df = get_data()
 
   st.write("The DataFrame shape is: {}".format(df.shape))
