@@ -41,26 +41,26 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 # #     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceID': str})
 # # # pd.read_csv('/content/drive/MyDrive/PROJECT_CIS523/data/data.csv',)
 
-def get_data():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    url = str(dir_path) + "/data/data.csv"
-    return pd.read_csv(url, encoding="ISO-8859-1")
-df = get_data()
+# def get_data():
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     url = str(dir_path) + "/data/data.csv"
+#     return pd.read_csv(url, encoding="ISO-8859-1")
+# df = get_data()
 
 
-st.title("CEI523 - FINAL ASSIGNMENT")
+# st.title("CEI523 - FINAL ASSIGNMENT")
 
-st.markdown("### Welcome to our project. The goal of this project is to user Retail Data to predict sales using customer segmentation")
+# st.markdown("### Welcome to our project. The goal of this project is to user Retail Data to predict sales using customer segmentation")
 
-st.markdown("#### Here we is a sample of the raw dataset used in our assignment")
+# st.markdown("#### Here we is a sample of the raw dataset used in our assignment")
 
-st.dataframe(df[:10])
+# st.dataframe(df[:10])
 
-# Add a selectbox to the sidebar (dummy for now):
-add_selectbox = st.sidebar.selectbox(
-    'How would you like to be contacted?',
-    ('Data Preparation', 'EDA', 'Machine Learning')
-)
+# # Add a selectbox to the sidebar (dummy for now):
+# add_selectbox = st.sidebar.selectbox(
+#     'How would you like to be contacted?',
+#     ('Data Preparation', 'EDA', 'Machine Learning')
+# )
 
 # st.title("Dataset Overview")
 
@@ -268,29 +268,37 @@ add_selectbox = st.sidebar.selectbox(
 #       risk_pos_quantity.append(subset.index.values[0])
 # """)
 
-# # Mark the negative entries to subset them out of the data later
-# # create a list of negative quantities that must be removed and they have identical
-# # Create a list of positive quantities that have identical and remove them
-# neg_quantity = []
-# risk_pos_quantity = []
-# for index in df.index:
-#   quantity = df.loc[index,'Quantity']
-#   cust_id = df.loc[index,'CustomerID']
-#   desc = df.loc[index,'Description']
-#   stockcode = df.loc[index,'StockCode']
-#   if (quantity < 0) & (stockcode != 'D'):
-#     neg_quantity.append(index)
-#     subset = df[(df['Quantity'] == -quantity) & 
-#                         (df['CustomerID'] == cust_id ) &
-#                         (df['Description'] == desc) &
-#                         (df['StockCode'] == stockcode )]
+# ## DONT RUN THE CODE BECAUSE IS VERY TIME CONSUMING ##
 
-#     #take only the first of it to remove it
-#     if subset.shape[0] >= 1:
-#       risk_pos_quantity.append(subset.index.values[0])
+# # # Mark the negative entries to subset them out of the data later
+# # # create a list of negative quantities that must be removed and they have identical
+# # # Create a list of positive quantities that have identical and remove them
+# # neg_quantity = []
+# # risk_pos_quantity = []
+# # for index in df.index:
+# #   quantity = df.loc[index,'Quantity']
+# #   cust_id = df.loc[index,'CustomerID']
+# #   desc = df.loc[index,'Description']
+# #   stockcode = df.loc[index,'StockCode']
+# #   if (quantity < 0) & (stockcode != 'D'):
+# #     neg_quantity.append(index)
+# #     subset = df[(df['Quantity'] == -quantity) & 
+# #                         (df['CustomerID'] == cust_id ) &
+# #                         (df['Description'] == desc) &
+# #                         (df['StockCode'] == stockcode )]
+
+# #     #take only the first of it to remove it
+# #     if subset.shape[0] >= 1:
+# #       risk_pos_quantity.append(subset.index.values[0])
+
+# # st.code("len(neg_quantity), len(risk_pos_quantity)")
+# # st.write("negative quantities: {}, positive quantities that were canceled: {}".format(len(neg_quantity), len(risk_pos_quantity)))
 
 # st.code("len(neg_quantity), len(risk_pos_quantity)")
-# st.write("negative quantities: {}, positive quantities that were canceled: {}".format(len(neg_quantity), len(risk_pos_quantity)))
+# st.write("negative quantities: {}, positive quantities that were canceled: {}".format(8795, 3224))
+
+
+# st.code("len(neg_quantity), len(risk_pos_quantity)")
 
 # st.markdown("Run the bellow to drop them")
 # st.code("""
@@ -299,17 +307,13 @@ add_selectbox = st.sidebar.selectbox(
 # df.describe()
 # """)
 
-# df.drop(neg_quantity, axis = 0, inplace = True)
-# df.drop(risk_pos_quantity, axis = 0, inplace = True)
-# df.describe()
+# # also the drop is commented because of the above comments
 
-# st.markdown("""
-# From the describe() above we can see that we still have negative values. Lets remove the stockcodes that are not casual transactions and then come back again to recheck everything
-# **Now lets remove rows that dont have to do with customers (like discounts or manual added entries)**
-# We can find them by getting all the stockcodes that are different We need a way to filter stockcodes that differ from the casual
-# """)
+# # df.drop(neg_quantity, axis = 0, inplace = True)
+# # df.drop(risk_pos_quantity, axis = 0, inplace = True)
+# # df[df['StockCode'].str.contains('^[a-zA-Z]+', regex=True)]['StockCode'].unique()) # code to find special stockcodes
 
-# st.write("Remove also the special stockcodes: ".format(df[df['StockCode'].str.contains('^[a-zA-Z]+', regex=True)]['StockCode'].unique()))
+# st.write("Remove also the special stockcodes: ".format(['POST', 'D', 'M', 'BANK CHARGES', 'C2', 'PADS', 'DOT']))
 
 # df = df[df['StockCode']!= 'POST']
 # df = df[df['StockCode']!= 'D']
@@ -319,20 +323,36 @@ add_selectbox = st.sidebar.selectbox(
 # df = df[df['StockCode']!= 'PADS']
 # df = df[df['StockCode']!= 'DOT']
 
+# st.markdown("""
+# """)
+# #### get_data
+# def get_data_cleaned():
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     url = str(dir_path) + "/data/data_cleaned_2.csv"
+#     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
+
+# df = get_data_cleaned()
+
+
 # st.write("Lets run describe to see if we still have negative quantities: ")
 # st.dataframe(df.describe())
 
 # st.markdown("""
-# Now lets check the dataframe again: Seems Like we have a final dataset with 393374 rows
+# Now lets check the dataframe again: Seems Like we have a final dataset with 388154 rows
 # """)
 
-#### get_data
+
+
+########### DATA PREPARATION: FEATURE ENGINEERING #################
+
 def get_data_cleaned():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     url = str(dir_path) + "/data/data_cleaned_2.csv"
     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
 
 df_cleaned = get_data_cleaned()
+
+st.title("Data Preparation: Feature Engineering")
 
 st.markdown("""
     ### Data Preparation section consits of some steps that include:
@@ -350,8 +370,14 @@ st.write("""
 Lets create a dataframe CartPrice which will contain the data for each transaction (group by invoice number)
 """)
 
-temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['FullPrice'].sum()
+temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['TotalPrice'].sum()
 cart_price = temp.rename(columns = {'TotalPrice':'Cart Price'})
+
+st.code("""
+temp_df = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['TotalPrice'].sum()
+cart_price = temp_df.rename(columns = {'TotalPrice':'Cart Price'})
+cart_price
+""")
 
 st.dataframe(cart_price)
 
@@ -361,6 +387,10 @@ st.markdown("""
 * Each product has a unique stockcode
 * Each product has a description which describes each product
 """)
+
+
+
+
 
 
 

@@ -45,26 +45,6 @@ def get_data():
 def app():
   st.title("Data Preparation: Data Overview & Cleaning")
   df = get_data()
-
-  st.write("The DataFrame shape is: {}".format(df.shape))
-
-  st.write("Now lets see the datatypes of each column and the null values of it: ")
-  columns_info = pd.DataFrame(df.dtypes.astype(str)).T.rename(index={0: 'Column Type'})
-  st.dataframe(columns_info)
-
-  st.write("Empty Values on each volumn: ")
-  st.dataframe(pd.DataFrame(df.isna().sum(), columns=['NaN']).transpose())
-
-  st.write("Lets run df.describe() to see what we have")
-  st.dataframe(df.describe())
-
-  st.write("Percentage of Empty Values:")
-  df_nan_perc = pd.DataFrame(df.isnull().sum()/df.shape[0]*100).T.rename(index={0:'Null Values (%)'})
-  st.dataframe(df_nan_perc)
-
-  st.markdown("**There are null values in the columns Description and CustomerID, these null values represent a ~0.26% and ~25% respectively.**")
-
-
   ### DATA PREPARATION SECTION ###
   st.title("Data Preparation Section")
   st.markdown("""
@@ -250,29 +230,37 @@ def app():
         risk_pos_quantity.append(subset.index.values[0])
   """)
 
-  # Mark the negative entries to subset them out of the data later
-  # create a list of negative quantities that must be removed and they have identical
-  # Create a list of positive quantities that have identical and remove them
-  neg_quantity = []
-  risk_pos_quantity = []
-  for index in df.index:
-    quantity = df.loc[index,'Quantity']
-    cust_id = df.loc[index,'CustomerID']
-    desc = df.loc[index,'Description']
-    stockcode = df.loc[index,'StockCode']
-    if (quantity < 0) & (stockcode != 'D'):
-      neg_quantity.append(index)
-      subset = df[(df['Quantity'] == -quantity) & 
-                          (df['CustomerID'] == cust_id ) &
-                          (df['Description'] == desc) &
-                          (df['StockCode'] == stockcode )]
+  ## DONT RUN THE CODE BECAUSE IS VERY TIME CONSUMING ##
 
-      #take only the first of it to remove it
-      if subset.shape[0] >= 1:
-        risk_pos_quantity.append(subset.index.values[0])
+  # # Mark the negative entries to subset them out of the data later
+  # # create a list of negative quantities that must be removed and they have identical
+  # # Create a list of positive quantities that have identical and remove them
+  # neg_quantity = []
+  # risk_pos_quantity = []
+  # for index in df.index:
+  #   quantity = df.loc[index,'Quantity']
+  #   cust_id = df.loc[index,'CustomerID']
+  #   desc = df.loc[index,'Description']
+  #   stockcode = df.loc[index,'StockCode']
+  #   if (quantity < 0) & (stockcode != 'D'):
+  #     neg_quantity.append(index)
+  #     subset = df[(df['Quantity'] == -quantity) & 
+  #                         (df['CustomerID'] == cust_id ) &
+  #                         (df['Description'] == desc) &
+  #                         (df['StockCode'] == stockcode )]
+
+  #     #take only the first of it to remove it
+  #     if subset.shape[0] >= 1:
+  #       risk_pos_quantity.append(subset.index.values[0])
+
+  # st.code("len(neg_quantity), len(risk_pos_quantity)")
+  # st.write("negative quantities: {}, positive quantities that were canceled: {}".format(len(neg_quantity), len(risk_pos_quantity)))
 
   st.code("len(neg_quantity), len(risk_pos_quantity)")
-  st.write("negative quantities: {}, positive quantities that were canceled: {}".format(len(neg_quantity), len(risk_pos_quantity)))
+  st.write("negative quantities: {}, positive quantities that were canceled: {}".format(8795, 3224))
+
+
+  st.code("len(neg_quantity), len(risk_pos_quantity)")
 
   st.markdown("Run the bellow to drop them")
   st.code("""
@@ -281,8 +269,18 @@ def app():
   df.describe()
   """)
 
-  df.drop(neg_quantity, axis = 0, inplace = True)
-  df.drop(risk_pos_quantity, axis = 0, inplace = True)
+  # also the drop is commented because of the above comments
+
+  # df.drop(neg_quantity, axis = 0, inplace = True)
+  # df.drop(risk_pos_quantity, axis = 0, inplace = True)
+
+  #### get_data
+  def get_data_cleaned():
+      dir_path = os.path.dirname(os.path.realpath(__file__))
+      url = str(dir_path) + "/data/data_cleaned_2.csv"
+      return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
+
+  df = get_data_cleaned()
   df.describe()
 
   st.markdown("""
@@ -308,7 +306,4 @@ def app():
   Now lets check the dataframe again: Seems Like we have a final dataset with 393374 rows
   """)
 
-  
-
-
-
+  df_cleaned = get_data_cleaned()
