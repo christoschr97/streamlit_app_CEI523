@@ -20,7 +20,7 @@ def app():
 	"""
 	st.markdown(html_temp,unsafe_allow_html=True)
 
-	def file_selector(folder_path='./data'):
+	def file_selector(folder_path='./src/data'):
 		filenames = os.listdir(folder_path)
 		selected_filename = st.selectbox("Select A file",filenames)
 		return os.path.join(folder_path,selected_filename)
@@ -29,7 +29,7 @@ def app():
 	st.info("You Selected {}".format(filename))
 
 	# Read Data
-	df = pd.read_csv(filename)
+	df = pd.read_csv(filename, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
 	# Show Dataset
 
 	# if st.checkbox("Show Dataset"):

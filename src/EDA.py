@@ -6,4 +6,4 @@ import pandas as pd
 
 
 def app():
-    st.title("EDA SECTION")
+    st.title("EDA SECTIONN")

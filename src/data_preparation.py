@@ -46,6 +46,7 @@ def get_data():
 
 def app():
     st.title("Data Preparation: Feature Engineering")
+    
     ########### DATA PREPARATION: FEATURE ENGINEERING #################
 
     def get_data_cleaned():
