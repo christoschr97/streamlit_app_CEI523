@@ -22,7 +22,6 @@ from sklearn.metrics import confusion_matrix
 from sklearn import neighbors, linear_model, svm, tree, ensemble
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import SGDClassifier
-from wordcloud import WordCloud, STOPWORDS
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.model_selection import cross_validate 
 from sklearn.neural_network import MLPClassifier
@@ -46,7 +45,7 @@ def get_data():
 
 def app():
     st.title("Data Preparation: Feature Engineering")
-    
+
     ########### DATA PREPARATION: FEATURE ENGINEERING #################
 
     def get_data_cleaned():
