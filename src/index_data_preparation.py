@@ -696,6 +696,6 @@ columns = ['count','min', 'max', 'mean', 'Cat_0', 'Cat_1', 'Cat_2', 'Cat_3', 'Ca
 X_fp = selected_customers[columns]
 Y_fp = selected_customers['cluster']
 
-X_fp.to_csv('x_data.csv', index=False)
-Y_fp.to_csv('y_data.csv', index=False)
+# X_fp.to_csv('x_data.csv', index=False)
+# Y_fp.to_csv('y_data.csv', index=False)
 

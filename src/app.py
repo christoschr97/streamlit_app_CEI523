@@ -66,8 +66,8 @@ st.markdown("### Here we is a sample of the raw dataset used in our assignment")
 
 # Add all your applications (pages) here
 app.add_page("Explore The Dataframe", dataset_explorer.app)
-app.add_page("Data Preparation: Feature Engineering", data_preparation.app)
 app.add_page("Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
+app.add_page("Data Preparation: Feature Engineering", data_preparation.app)
 app.add_page("Exploratory Data Analysis", EDA.app)
 app.add_page("Dada Modelling", data_modeling.app)
 app.add_page("Visualization and Communication", viz_and_com.app) #maybe this needs to be injected to the previous section and we will see
