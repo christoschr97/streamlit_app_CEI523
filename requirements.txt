@@ -34,7 +34,7 @@ nltk == 3.5
 # PROJECT_CEI523/src/old/index.py: 3,7
 # PROJECT_CEI523/src/old/index_data_preparation.py: 3,7
 # PROJECT_CEI523/src/viz_and_com.py: 2,4
-numpy == 1.17.4
+numpy == 1.21.4
 
 # PROJECT_CEI523/src/EDA.py: 5
 # PROJECT_CEI523/src/app.py: 2
