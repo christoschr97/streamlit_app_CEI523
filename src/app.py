@@ -41,6 +41,7 @@ import EDA # the EDA File
 import dataset_overview # the dataset overview File
 import data_modeling # the data modeling File
 import viz_and_com # the visualization and communication file
+import dataset_explorer # dataset explorer
 
 
 # Create an instance of the app 
@@ -64,6 +65,7 @@ st.markdown("### Here we is a sample of the raw dataset used in our assignment")
 # st.dataframe(df[:10])
 
 # Add all your applications (pages) here
+app.add_page("Explore The Dataframe", dataset_explorer.app)
 app.add_page("Data Preparation: Feature Engineering", data_preparation.app)
 app.add_page("Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
 app.add_page("Exploratory Data Analysis", EDA.app)

@@ -36,216 +36,240 @@ plt.style.use('fivethirtyeight')
 mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 
 
-# # def get_data():
-# #     url = "https://raw.githubusercontent.com/christoschr97/CEI523-online-retail-data/master/data.csv"
-# #     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceID': str})
-# # # pd.read_csv('/content/drive/MyDrive/PROJECT_CIS523/data/data.csv',)
-
 # def get_data():
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     url = str(dir_path) + "/data/data.csv"
-#     return pd.read_csv(url, encoding="ISO-8859-1")
-# df = get_data()
+#     url = "https://raw.githubusercontent.com/christoschr97/CEI523-online-retail-data/master/data.csv"
+#     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceID': str})
+# # pd.read_csv('/content/drive/MyDrive/PROJECT_CIS523/data/data.csv',)
+
+def get_data():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    url = str(dir_path) + "/data/data.csv"
+    return pd.read_csv(url, encoding="ISO-8859-1")
+df = get_data()
 
 
-# st.title("CEI523 - FINAL ASSIGNMENT")
+st.title("CEI523 - FINAL ASSIGNMENT")
 
-# st.markdown("### Welcome to our project. The goal of this project is to user Retail Data to predict sales using customer segmentation")
+st.markdown("### Welcome to our project. The goal of this project is to user Retail Data to predict sales using customer segmentation")
 
-# st.markdown("#### Here we is a sample of the raw dataset used in our assignment")
+st.markdown("#### Here we is a sample of the raw dataset used in our assignment")
 
-# st.dataframe(df[:10])
+st.dataframe(df[:10])
 
-# # Add a selectbox to the sidebar (dummy for now):
-# add_selectbox = st.sidebar.selectbox(
-#     'How would you like to be contacted?',
-#     ('Data Preparation', 'EDA', 'Machine Learning')
-# )
+# Add a selectbox to the sidebar (dummy for now):
+add_selectbox = st.sidebar.selectbox(
+    'How would you like to be contacted?',
+    ('Data Preparation', 'EDA', 'Machine Learning')
+)
 
-# st.title("Dataset Overview")
+st.title("Dataset Overview")
 
-# st.write("The DataFrame shape is: {}".format(df.shape))
+st.write("The DataFrame shape is: {}".format(df.shape))
 
-# st.write("Now lets see the datatypes of each column and the null values of it: ")
-# columns_info = pd.DataFrame(df.dtypes.astype(str)).T.rename(index={0: 'Column Type'})
-# st.dataframe(columns_info)
+st.write("Now lets see the datatypes of each column and the null values of it: ")
+columns_info = pd.DataFrame(df.dtypes.astype(str)).T.rename(index={0: 'Column Type'})
+st.dataframe(columns_info)
 
-# st.write("Empty Values on each volumn: ")
-# st.dataframe(pd.DataFrame(df.isna().sum(), columns=['NaN']).transpose())
+st.write("Empty Values on each volumn: ")
+st.dataframe(pd.DataFrame(df.isna().sum(), columns=['NaN']).transpose())
 
-# st.write("Lets run df.describe() to see what we have")
-# st.dataframe(df.describe())
+st.write("Lets run df.describe() to see what we have")
+st.dataframe(df.describe())
 
-# st.write("Percentage of Empty Values:")
-# df_nan_perc = pd.DataFrame(df.isnull().sum()/df.shape[0]*100).T.rename(index={0:'Null Values (%)'})
-# st.dataframe(df_nan_perc)
+st.write("Percentage of Empty Values:")
+df_nan_perc = pd.DataFrame(df.isnull().sum()/df.shape[0]*100).T.rename(index={0:'Null Values (%)'})
+st.dataframe(df_nan_perc)
 
-# st.markdown("**There are null values in the columns Description and CustomerID, these null values represent a ~0.26% and ~25% respectively.**")
-
-
-# ### DATA PREPARATION SECTION ###
-# st.title("Data Preparation Section")
-# st.markdown("""
-#     ### Data Cleaning Section
-#     Here we will briefly explain what we did and how we did it in terms of data cleansing
-
-#     Now we know that almost 25% of the transactions are not assigned to a particular client and arround 0.27% of the transactions descriptions are not specified, 
-#     there are several ways to deal with missing values:
-
-#     Impute values for the CustomerID and Description, in this case it is impossible, does not make sense.
-#     Apply clustering analysis and see patterns in those unknown clients and unknown description of products. Once these patterns are detected we can assign a labels for them and use these labels as a generic CustomerID and Description.
-#     Delete the rows where these missing values are found.
-# """)
-
-# st.write(" ")
-# st.write("By utilizing the code below we can drop the rows where the customer is NaN and thus we cannot utilize them in our project")
-
-# st.code("df.dropna(axis = 0, subset = ['CustomerID'], inplace = True")
-# df.dropna(axis = 0, subset = ['CustomerID'], inplace = True)
-
-# st.write("Now we have cleared the missing values of Customer ID lets see again whats happening")
-
-# columns_info=pd.DataFrame(df.dtypes.astype(str)).T.rename(index={0:'Column Type'})
-# columns_info=columns_info.append(pd.DataFrame(df.isnull().sum()).T.rename(index={0:'Null Values (NB)'}).astype(str))
-# columns_info=columns_info.append(pd.DataFrame(df.isnull().sum()/df.shape[0]*100).T.rename(index={0:'Null Values (%)'}).astype(str))
-# st.write(columns_info)
-
-# duplicates = df.duplicated().sum()
-# st.write("We have now to check if there are duplicated values in our dataset: {} rows in total.".format(duplicates))
+st.markdown("**There are null values in the columns Description and CustomerID, these null values represent a ~0.26% and ~25% respectively.**")
 
 
-# st.write("Lets see a sample of them: ")
-# st.dataframe(df[df.duplicated()].head(5))
+### DATA PREPARATION SECTION ###
+st.title("Data Preparation Section")
+st.markdown("""
+    ### Data Cleaning Section
+    Here we will briefly explain what we did and how we did it in terms of data cleansing
 
-# st.write("Lets take the first one to filter the original dataframe to see if they are actual duplicates: ")
-# st.markdown("""
-#     **So we can clearly see that we have duplicates with the row bellow:**
-# """)
-# st.dataframe(df[(df['InvoiceNo'] == '536409') & (df['StockCode'] == '21866')])
+    Now we know that almost 25% of the transactions are not assigned to a particular client and arround 0.27% of the transactions descriptions are not specified, 
+    there are several ways to deal with missing values:
 
-# st.write("We can remove them using the code bellow: ")
-# st.code("df.drop_duplicates(inplace=True)")
-# df.drop_duplicates(inplace=True)
+    Impute values for the CustomerID and Description, in this case it is impossible, does not make sense.
+    Apply clustering analysis and see patterns in those unknown clients and unknown description of products. Once these patterns are detected we can assign a labels for them and use these labels as a generic CustomerID and Description.
+    Delete the rows where these missing values are found.
+""")
 
-# ## FEATURE EXPLORATION ##
-# st.markdown("#### Explore Columns and Possible Features")
-# st.markdown("Lets investigate the orders per country")
+st.write(" ")
+st.write("By utilizing the code below we can drop the rows where the customer is NaN and thus we cannot utilize them in our project")
 
-# ### Let's create a dataframe where we will group the countries to see from which country the most of the sales come from
-# temp = df[['CustomerID', 'InvoiceNo', 'Country']].groupby(['CustomerID', 'InvoiceNo', 'Country']).count()
-# temp = temp.reset_index(drop=False)
-# countries = temp['Country'].value_counts()
+st.code("df.dropna(axis = 0, subset = ['CustomerID'], inplace = True")
+df.dropna(axis = 0, subset = ['CustomerID'], inplace = True)
 
-# COUNTRY, COUNTRY_ORDERS = np.unique(temp['Country'], return_counts=True)
-# data_country_purchases = pd.DataFrame({'Country': COUNTRY, 'Orders': COUNTRY_ORDERS})
-# data_country_purchases.sort_values(by='Orders', ascending=False, inplace=True, ignore_index=True)
-# st.dataframe(data_country_purchases.head(10))
+st.write("Now we have cleared the missing values of Customer ID lets see again whats happening")
 
-# fig, ax = plt.subplots()
-# plt.xticks(rotation=90)
-# ax.bar(data_country_purchases['Country'], data_country_purchases['Orders'])
-# ax.set(title="Countries orders", ylabel="Count")
-# st.pyplot(fig=fig)
+columns_info=pd.DataFrame(df.dtypes.astype(str)).T.rename(index={0:'Column Type'})
+columns_info=columns_info.append(pd.DataFrame(df.isnull().sum()).T.rename(index={0:'Null Values (NB)'}).astype(str))
+columns_info=columns_info.append(pd.DataFrame(df.isnull().sum()/df.shape[0]*100).T.rename(index={0:'Null Values (%)'}).astype(str))
+st.write(columns_info)
+
+duplicates = df.duplicated().sum()
+st.write("We have now to check if there are duplicated values in our dataset: {} rows in total.".format(duplicates))
 
 
-# ### Now lets see the products the transactions and the customers
-# st.markdown("""
-# ##### Customers, Products and Transaction
-# Lets count the values
-# """)
-# st.dataframe(pd.DataFrame([{'Products': len(df['StockCode'].value_counts()), 'Transactions': len(df['InvoiceNo'].value_counts()), 'Customers': len(df['CustomerID'].value_counts())}], columns = ['Products', 'Transactions', 'Customers'], index = ['Quantity']))
+st.write("Lets see a sample of them: ")
+st.dataframe(df[df.duplicated()].head(5))
+
+st.write("Lets take the first one to filter the original dataframe to see if they are actual duplicates: ")
+st.markdown("""
+    **So we can clearly see that we have duplicates with the row bellow:**
+""")
+st.dataframe(df[(df['InvoiceNo'] == '536409') & (df['StockCode'] == '21866')])
+
+st.write("We can remove them using the code bellow: ")
+st.code("df.drop_duplicates(inplace=True)")
+df.drop_duplicates(inplace=True)
+
+## FEATURE EXPLORATION ##
+st.markdown("#### Explore Columns and Possible Features")
+st.markdown("Lets investigate the orders per country")
+
+### Let's create a dataframe where we will group the countries to see from which country the most of the sales come from
+temp = df[['CustomerID', 'InvoiceNo', 'Country']].groupby(['CustomerID', 'InvoiceNo', 'Country']).count()
+temp = temp.reset_index(drop=False)
+countries = temp['Country'].value_counts()
+
+COUNTRY, COUNTRY_ORDERS = np.unique(temp['Country'], return_counts=True)
+data_country_purchases = pd.DataFrame({'Country': COUNTRY, 'Orders': COUNTRY_ORDERS})
+data_country_purchases.sort_values(by='Orders', ascending=False, inplace=True, ignore_index=True)
+st.dataframe(data_country_purchases.head(10))
+
+fig, ax = plt.subplots()
+plt.xticks(rotation=90)
+ax.bar(data_country_purchases['Country'], data_country_purchases['Orders'])
+ax.set(title="Countries orders", ylabel="Count")
+st.pyplot(fig=fig)
 
 
-# ### Now lets see the Products sold 
-# st.markdown("""
-# ##### Now lets visualize how many times a product was sold
-# Lets count the values
-# """)
-# PRODUCTS_ID, QUANTITY_SOLD = np.unique(df['StockCode'], return_counts=True)
-# products_purchases = pd.DataFrame({'Product ID': PRODUCTS_ID, 'Quantity Sold': QUANTITY_SOLD})
-# products_purchases.sort_values(by='Quantity Sold', ascending=False, inplace=True, ignore_index=True)
-# st.dataframe(products_purchases.head(10))
-
-# st.markdown("""
-# #### Now lets see / check the number of products bought in every transaction
-# """)
-# temp = df.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['InvoiceDate'].count()
-# products_per_transaction = temp.rename(columns = {'InvoiceDate': 'Number of Products'})
-# products_per_transaction.sort_values('CustomerID', ascending=True, inplace=True, ignore_index=True)
-# st.dataframe(products_per_transaction.head(10))
-
-# st.write("As we can see from the above we gained some insights: ")
-# st.markdown("""
-# 1. We have customers that bought once and customers that made more than one purchase
-# 2. We have transactions that start with the 'C' letter and this imply that they were canceled
-# """)
+### Now lets see the products the transactions and the customers
+st.markdown("""
+##### Customers, Products and Transaction
+Lets count the values
+""")
+st.dataframe(pd.DataFrame([{'Products': len(df['StockCode'].value_counts()), 'Transactions': len(df['InvoiceNo'].value_counts()), 'Customers': len(df['CustomerID'].value_counts())}], columns = ['Products', 'Transactions', 'Customers'], index = ['Quantity']))
 
 
-# #### CANCELED ORDERS IN DATA CLEANING 
+### Now lets see the Products sold 
+st.markdown("""
+##### Now lets visualize how many times a product was sold
+Lets count the values
+""")
+PRODUCTS_ID, QUANTITY_SOLD = np.unique(df['StockCode'], return_counts=True)
+products_purchases = pd.DataFrame({'Product ID': PRODUCTS_ID, 'Quantity Sold': QUANTITY_SOLD})
+products_purchases.sort_values(by='Quantity Sold', ascending=False, inplace=True, ignore_index=True)
+st.dataframe(products_purchases.head(10))
 
-# st.markdown("""
-# #### Tackle with Negative Quantities
-# Run a describe to remember what we have
-# """)
-# st.dataframe(df.describe())
+st.markdown("""
+#### Now lets see / check the number of products bought in every transaction
+""")
+temp = df.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['InvoiceDate'].count()
+products_per_transaction = temp.rename(columns = {'InvoiceDate': 'Number of Products'})
+products_per_transaction.sort_values('CustomerID', ascending=True, inplace=True, ignore_index=True)
+st.dataframe(products_per_transaction.head(10))
 
-# st.write("As we remember from the first section, we have to tackle negative quantities.")
-# # lets find the canceled orders and add them in a temporary dataframe
-# products_per_transaction['Order_Canceled'] = products_per_transaction['InvoiceNo'].apply(lambda x:int('C' in x))
-# st.dataframe(products_per_transaction[['InvoiceNo', 'Order_Canceled']])
-
-# st.markdown("##### We need to check the proportion of canceled and completed order: ")
-# canceled_transactions = products_per_transaction['Order_Canceled'].sum()
-# total_transactions = products_per_transaction.shape[0]
-# percent_canceled = canceled_transactions/total_transactions*100
-# percent_completed = 100-(canceled_transactions/total_transactions*100)
-
-# st.write('Number of orders canceled: {}'.format(canceled_transactions))
-# st.write('Number of orders completed: {}'.format(total_transactions-canceled_transactions))
-
-# fig = plt.figure()
-# ax = fig.add_axes([0,0,1,1])
-# x = ['Orders Canceled', 'Orders Completed']
-# y = [percent_canceled, percent_completed]
-# ax.bar(x,y)
-# ax.set_ylim([0, 100])
-# st.pyplot(fig=fig)
-
-# st.markdown("""
-# ##### Lets take a Cancelation Order and visualize the quantities to understand what is happening.
-# """)
-# st.code("df[(df['StockCode'] == '35004C') & (df['CustomerID'] == 15311)]")
-# st.dataframe(df[(df['StockCode'] == '35004C') & (df['CustomerID'] == 15311)])
-
-# st.markdown("""
-# From the table above we can see that the castomer can return only a part of the transaction so we need to try something else
-
-# Moreover we have 3 possibel cases:
-# * Negative quantities that have counterparts
-# * Negative quantities without counterparts (which simply means that the custimer returned only a portion of the items back)
-# * Negative quantities due to discound ("D")
-# """)
+st.write("As we can see from the above we gained some insights: ")
+st.markdown("""
+1. We have customers that bought once and customers that made more than one purchase
+2. We have transactions that start with the 'C' letter and this imply that they were canceled
+""")
 
 
-# st.markdown("""
-# Some canceled order may have an identical order with positive quantity but some of them may not. Lets check it:
+#### CANCELED ORDERS IN DATA CLEANING 
 
-# ##### Algorithm for finding and tackle with Canceled Orders 
+st.markdown("""
+#### Tackle with Negative Quantities
+Run a describe to remember what we have
+""")
+st.dataframe(df.describe())
 
-# Loop through the dataframe
-# * Select each row and check whether there is an identical in the dataframe but the only different should be the quantity and opposite (at this step we will check if there is the exact same date and time)
-# * If there is then add the index of the row to a list to delete this positive entry
-# * Additionally, add the negative quantity to another list to remove it
-# * After this finish we need to delete StockCodes that do not correspond to items and thus we will completely discard all the negative quantities (i assume)
+st.write("As we remember from the first section, we have to tackle negative quantities.")
+# lets find the canceled orders and add them in a temporary dataframe
+products_per_transaction['Order_Canceled'] = products_per_transaction['InvoiceNo'].apply(lambda x:int('C' in x))
+st.dataframe(products_per_transaction[['InvoiceNo', 'Order_Canceled']])
 
-# **Lets wrap up the plan:**
-# * First find the positive quantities that have counterparts
-# * After check the dataframe and see if there are negative quantities
-# * If there are we will remove the StockCodes refer to special codes such as discount etc. and then we will recheck the dataframe.
-# * If they still exist in the dataframe (negative quantities) we need to somehow remove them from other products because they may are returns of a portion of a product.
-# """)
+st.markdown("##### We need to check the proportion of canceled and completed order: ")
+canceled_transactions = products_per_transaction['Order_Canceled'].sum()
+total_transactions = products_per_transaction.shape[0]
+percent_canceled = canceled_transactions/total_transactions*100
+percent_completed = 100-(canceled_transactions/total_transactions*100)
 
-# st.code("""
+st.write('Number of orders canceled: {}'.format(canceled_transactions))
+st.write('Number of orders completed: {}'.format(total_transactions-canceled_transactions))
+
+fig = plt.figure()
+ax = fig.add_axes([0,0,1,1])
+x = ['Orders Canceled', 'Orders Completed']
+y = [percent_canceled, percent_completed]
+ax.bar(x,y)
+ax.set_ylim([0, 100])
+st.pyplot(fig=fig)
+
+st.markdown("""
+##### Lets take a Cancelation Order and visualize the quantities to understand what is happening.
+""")
+st.code("df[(df['StockCode'] == '35004C') & (df['CustomerID'] == 15311)]")
+st.dataframe(df[(df['StockCode'] == '35004C') & (df['CustomerID'] == 15311)])
+
+st.markdown("""
+From the table above we can see that the castomer can return only a part of the transaction so we need to try something else
+
+Moreover we have 3 possibel cases:
+* Negative quantities that have counterparts
+* Negative quantities without counterparts (which simply means that the custimer returned only a portion of the items back)
+* Negative quantities due to discound ("D")
+""")
+
+
+st.markdown("""
+Some canceled order may have an identical order with positive quantity but some of them may not. Lets check it:
+
+##### Algorithm for finding and tackle with Canceled Orders 
+
+Loop through the dataframe
+* Select each row and check whether there is an identical in the dataframe but the only different should be the quantity and opposite (at this step we will check if there is the exact same date and time)
+* If there is then add the index of the row to a list to delete this positive entry
+* Additionally, add the negative quantity to another list to remove it
+* After this finish we need to delete StockCodes that do not correspond to items and thus we will completely discard all the negative quantities (i assume)
+
+**Lets wrap up the plan:**
+* First find the positive quantities that have counterparts
+* After check the dataframe and see if there are negative quantities
+* If there are we will remove the StockCodes refer to special codes such as discount etc. and then we will recheck the dataframe.
+* If they still exist in the dataframe (negative quantities) we need to somehow remove them from other products because they may are returns of a portion of a product.
+""")
+
+st.code("""
+# Mark the negative entries to subset them out of the data later
+# create a list of negative quantities that must be removed and they have identical
+# Create a list of positive quantities that have identical and remove them
+neg_quantity = []
+risk_pos_quantity = []
+for index in df.index:
+  quantity = df.loc[index,'Quantity']
+  cust_id = df.loc[index,'CustomerID']
+  desc = df.loc[index,'Description']
+  stockcode = df.loc[index,'StockCode']
+  if (quantity < 0) & (stockcode != 'D'):
+    neg_quantity.append(index)
+    subset = df[(df['Quantity'] == -quantity) & 
+                        (df['CustomerID'] == cust_id ) &
+                        (df['Description'] == desc) &
+                        (df['StockCode'] == stockcode )]
+
+    #take only the first of it to remove it
+    if subset.shape[0] >= 1:
+      risk_pos_quantity.append(subset.index.values[0])
+""")
+
+## DONT RUN THE CODE BECAUSE IS VERY TIME CONSUMING ##
+
 # # Mark the negative entries to subset them out of the data later
 # # create a list of negative quantities that must be removed and they have identical
 # # Create a list of positive quantities that have identical and remove them
@@ -266,127 +290,60 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 #     #take only the first of it to remove it
 #     if subset.shape[0] >= 1:
 #       risk_pos_quantity.append(subset.index.values[0])
-# """)
-
-# ## DONT RUN THE CODE BECAUSE IS VERY TIME CONSUMING ##
-
-# # # Mark the negative entries to subset them out of the data later
-# # # create a list of negative quantities that must be removed and they have identical
-# # # Create a list of positive quantities that have identical and remove them
-# # neg_quantity = []
-# # risk_pos_quantity = []
-# # for index in df.index:
-# #   quantity = df.loc[index,'Quantity']
-# #   cust_id = df.loc[index,'CustomerID']
-# #   desc = df.loc[index,'Description']
-# #   stockcode = df.loc[index,'StockCode']
-# #   if (quantity < 0) & (stockcode != 'D'):
-# #     neg_quantity.append(index)
-# #     subset = df[(df['Quantity'] == -quantity) & 
-# #                         (df['CustomerID'] == cust_id ) &
-# #                         (df['Description'] == desc) &
-# #                         (df['StockCode'] == stockcode )]
-
-# #     #take only the first of it to remove it
-# #     if subset.shape[0] >= 1:
-# #       risk_pos_quantity.append(subset.index.values[0])
-
-# # st.code("len(neg_quantity), len(risk_pos_quantity)")
-# # st.write("negative quantities: {}, positive quantities that were canceled: {}".format(len(neg_quantity), len(risk_pos_quantity)))
 
 # st.code("len(neg_quantity), len(risk_pos_quantity)")
-# st.write("negative quantities: {}, positive quantities that were canceled: {}".format(8795, 3224))
+# st.write("negative quantities: {}, positive quantities that were canceled: {}".format(len(neg_quantity), len(risk_pos_quantity)))
+
+st.code("len(neg_quantity), len(risk_pos_quantity)")
+st.write("negative quantities: {}, positive quantities that were canceled: {}".format(8795, 3224))
 
 
-# st.code("len(neg_quantity), len(risk_pos_quantity)")
+st.code("len(neg_quantity), len(risk_pos_quantity)")
 
-# st.markdown("Run the bellow to drop them")
-# st.code("""
+st.markdown("Run the bellow to drop them")
+st.code("""
+df.drop(neg_quantity, axis = 0, inplace = True)
+df.drop(risk_pos_quantity, axis = 0, inplace = True)
+df.describe()
+""")
+
+# also the drop is commented because of the above comments
+
 # df.drop(neg_quantity, axis = 0, inplace = True)
 # df.drop(risk_pos_quantity, axis = 0, inplace = True)
-# df.describe()
-# """)
+# df[df['StockCode'].str.contains('^[a-zA-Z]+', regex=True)]['StockCode'].unique()) # code to find special stockcodes
 
-# # also the drop is commented because of the above comments
+st.write("Remove also the special stockcodes: ".format(['POST', 'D', 'M', 'BANK CHARGES', 'C2', 'PADS', 'DOT']))
 
-# # df.drop(neg_quantity, axis = 0, inplace = True)
-# # df.drop(risk_pos_quantity, axis = 0, inplace = True)
-# # df[df['StockCode'].str.contains('^[a-zA-Z]+', regex=True)]['StockCode'].unique()) # code to find special stockcodes
+df = df[df['StockCode']!= 'POST']
+df = df[df['StockCode']!= 'D']
+df = df[df['StockCode']!= 'C2']
+df = df[df['StockCode']!= 'M']
+df = df[df['StockCode']!= 'BANK CHARGES']
+df = df[df['StockCode']!= 'PADS']
+df = df[df['StockCode']!= 'DOT']
 
-# st.write("Remove also the special stockcodes: ".format(['POST', 'D', 'M', 'BANK CHARGES', 'C2', 'PADS', 'DOT']))
-
-# df = df[df['StockCode']!= 'POST']
-# df = df[df['StockCode']!= 'D']
-# df = df[df['StockCode']!= 'C2']
-# df = df[df['StockCode']!= 'M']
-# df = df[df['StockCode']!= 'BANK CHARGES']
-# df = df[df['StockCode']!= 'PADS']
-# df = df[df['StockCode']!= 'DOT']
-
-# st.markdown("""
-# """)
-# #### get_data
-# def get_data_cleaned():
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     url = str(dir_path) + "/data/data_cleaned_2.csv"
-#     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
-
-# df = get_data_cleaned()
-
-
-# st.write("Lets run describe to see if we still have negative quantities: ")
-# st.dataframe(df.describe())
-
-# st.markdown("""
-# Now lets check the dataframe again: Seems Like we have a final dataset with 388154 rows
-# """)
-
-
-
-########### DATA PREPARATION: FEATURE ENGINEERING #################
-
+st.markdown("""
+""")
+#### get_data
 def get_data_cleaned():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     url = str(dir_path) + "/data/data_cleaned_2.csv"
     return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
 
-df_cleaned = get_data_cleaned()
+df = get_data_cleaned()
 
-st.title("Data Preparation: Feature Engineering")
 
-st.markdown("""
-    ### Data Preparation section consits of some steps that include:
-    * Data Transformation
-    * Feature Engineering
-
-    ### In this Page we will create the following categories:
-    1. Product Categories
-    2. Customer Categories
-""")
-
-st.dataframe(df_cleaned.describe())
-
-st.write("""
-Lets create a dataframe CartPrice which will contain the data for each transaction (group by invoice number)
-""")
-
-temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['TotalPrice'].sum()
-cart_price = temp.rename(columns = {'TotalPrice':'Cart Price'})
-
-st.code("""
-temp_df = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['TotalPrice'].sum()
-cart_price = temp_df.rename(columns = {'TotalPrice':'Cart Price'})
-cart_price
-""")
-
-st.dataframe(cart_price)
+st.write("Lets run describe to see if we still have negative quantities: ")
+st.dataframe(df.describe())
 
 st.markdown("""
-# Understand Products: Create Product Categories
-**What do we already know about the products?**
-* Each product has a unique stockcode
-* Each product has a description which describes each product
+Now lets check the dataframe again: Seems Like we have a final dataset with 388154 rows
 """)
+
+
+
+
 
 
 
