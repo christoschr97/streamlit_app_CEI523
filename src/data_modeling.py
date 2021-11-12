@@ -256,8 +256,8 @@ def app():
     """)
 
     mlp_clf = MLP_Classifier()
+    mlp_clf.fit(X_train, y_train)
     predictions = mlp_clf.predict(X_test)
     metrics.accuracy_score(y_test, predictions)
-    mlp_clf.fit(X_train, y_train)
     st.write(metrics.classification_report(y_test, predictions))
 
