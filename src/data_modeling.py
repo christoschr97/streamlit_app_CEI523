@@ -248,6 +248,7 @@ def app():
     st.markdown("""
     ##### Now lets train MLP properly
     """)
+    
     st.code("""
     mlp_clf = MLP_Classifier()
     predictions = mlp_clf.predict(X_test)
