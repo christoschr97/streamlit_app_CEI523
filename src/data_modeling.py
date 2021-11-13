@@ -232,7 +232,7 @@ def app():
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
 
-    with st.spinner('MLP CLASSIFIER TRAINING: Wait for it...'):
+    with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
         cv_results_fp = cross_validate(MLP_Classifier(),
                                 X_train,
                                 y_train,
@@ -257,9 +257,19 @@ def app():
     test
     """)
 
-    mlp_clf = MLP_Classifier()
-    mlp_clf.fit(X_train, y_train)
-    predictions = mlp_clf.predict(X_test)
-    metrics.accuracy_score(y_test, predictions)
-    st.write(metrics.classification_report(y_test, predictions))
+    with st.spinner('MLP CLASSIFIER TRAINING: Wait for it...'):
+        mlp_clf = MLP_Classifier()
+        mlp_clf.fit(X_train, y_train)
+        predictions = mlp_clf.predict(X_test)
+        metrics.accuracy_score(y_test, predictions)
+        st.write(metrics.classification_report(y_test, predictions))
+
+    st.markdown("""
+    ## Now lets train MLP Algorithm with the test set we saved in period after
+    """)
+
+    # test_set = pd.read_csv('')
+    st.markdown("""
+    
+    """)
 

@@ -354,7 +354,16 @@ def app():
         silhouette_avg = silhouette_score(Word_X_matrix, clusters)
         print("For n_clusters =", n_clusters, "The average silhouette_score is :", silhouette_avg)
     """)
-
+    st.markdown("""
+    ResulFor n_clusters = 3 The average silhouette_score is : 0.11142050517146847
+    * For n_clusters = 4 The average silhouette_score is : 0.11369426930609004
+    * For n_clusters = 5 The average silhouette_score is : 0.15605111618663936
+    * For n_clusters = 6 The average silhouette_score is : 0.16591614204472466
+    * For n_clusters = 7 The average silhouette_score is : 0.16497509597519985
+    * For n_clusters = 8 The average silhouette_score is : 0.12549958008303969
+    * For n_clusters = 9 The average silhouette_score is : 0.13722223664399463
+    """)
+    
     st.write("Through the code above we conclude to use `K=5` (we dont run it because of the long runtime required)")
     st.write("The code bellow will create clusters of Products utilizing the word_X_matrix we created utilizing the one-hot-encoding principle and adding the price range scaled from 1-10")
     st.code("""
