@@ -7,3 +7,5 @@ import pandas as pd
 
 def app():
     st.title("EDA SECTIONN")
+    # Reads
+    st.write(st.session_state.key)

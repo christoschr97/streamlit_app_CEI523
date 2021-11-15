@@ -43,6 +43,7 @@ def get_data():
     url = str(dir_path) + "/data/data_cleaned.csv"
     return pd.read_csv(url, encoding="ISO-8859-1")
 
+@st.cache(suppress_st_warning=True)
 def app():
     st.title("Data Preparation: Feature Engineering")
 
@@ -658,6 +659,10 @@ def app():
     n_clusters = 14
     kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, n_jobs=-1, random_state=42)
     kmeans.fit(minmaxscaled_matrix)
+
+    if 'kmeans' not in st.session_state:
+        st.session_state['kmeans'] = kmeans
+        
     clients_clusters = kmeans.predict(minmaxscaled_matrix)
     silhouette_avg = silhouette_score(minmaxscaled_matrix, clients_clusters)
     print("For n_clusters =", n_clusters, "The average silhouette_score is :", silhouette_avg)

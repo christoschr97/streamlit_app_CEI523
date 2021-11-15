@@ -15,6 +15,10 @@ def app():
 	st.title("Common ML Dataset Explorer")
 	st.subheader("Datasets For ML Explorer with Streamlit")
 
+	# # Initialization
+	# if 'key' not in st.session_state:
+	# 	st.session_state['key'] = 'value'
+
 	html_temp = """
 	<div style="background-color:tomato;"><p style="color:white;font-size:50px;padding:10px">Streamlit is Awesome</p></div>
 	"""

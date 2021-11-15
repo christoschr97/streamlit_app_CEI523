@@ -227,27 +227,31 @@ def app():
     `X_train = scaler.transform(X_train)`
     `X_test = scaler.transform(X_test)`
     """)
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-    X_train = scaler.transform(X_train)
-    X_test = scaler.transform(X_test)
+    # scaler = StandardScaler()
+    # scaler.fit(X_train)
+    # X_train = scaler.transform(X_train)
+    # X_test = scaler.transform(X_test)
 
-    with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
-        cv_results_fp = cross_validate(MLP_Classifier(),
-                                X_train,
-                                y_train,
-                                cv=10, 
-                                return_train_score=True, 
-                                scoring='accuracy')
+    # with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
+    #     cv_results_fp = cross_validate(MLP_Classifier(),
+    #                             X_train,
+    #                             y_train,
+    #                             cv=10, 
+    #                             return_train_score=True, 
+    #                             scoring='accuracy')
 
-        for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
-            st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
+    #     for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
+    #         st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
 
-    print("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
+    # print("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
 
     st.markdown("""
     ##### Now lets train MLP properly
     """)
+    
+    # Reads
+    print("key")
+    print(st.session_state.kmeans)
 
     st.code("""
     mlp_clf = MLP_Classifier()
@@ -257,19 +261,64 @@ def app():
     test
     """)
 
-    with st.spinner('MLP CLASSIFIER TRAINING: Wait for it...'):
-        mlp_clf = MLP_Classifier()
-        mlp_clf.fit(X_train, y_train)
-        predictions = mlp_clf.predict(X_test)
-        metrics.accuracy_score(y_test, predictions)
-        st.write(metrics.classification_report(y_test, predictions))
+    # with st.spinner('MLP CLASSIFIER TRAINING: Wait for it...'):
+    #     mlp_clf = MLP_Classifier()
+    #     mlp_clf.fit(X_train, y_train)
+    #     predictions = mlp_clf.predict(X_test)
+    #     metrics.accuracy_score(y_test, predictions)
+    #     st.write(metrics.classification_report(y_test, predictions))
 
     st.markdown("""
     ## Now lets train MLP Algorithm with the test set we saved in period after
     """)
 
-    # test_set = pd.read_csv('')
+    cart_price = pd.read_csv('./src/data/test_set.csv')
+    cart_price['InvoiceDate'] = cart_price['InvoiceDate'].astype('datetime64[ns]')
+    print(cart_price.dtypes) 
+
     st.markdown("""
-    
+    ##### Test set from Last Period:
+    For these we need to use the test_set we prepared in the Feature Engineering section and reconstruct the input X as X_lp (Last Period) and the Y_lp respectively
     """)
+    transactions_per_user=cart_price.groupby(by=['CustomerID'])['Cart Price'].agg(['count','min','max','mean','sum'])
+    for i in range(5):
+        col = 'Cat_{}'.format(i)
+        transactions_per_user.loc[:,col] = cart_price.groupby(by=['CustomerID'])[col].sum() / transactions_per_user['sum']*100
+
+    transactions_per_user.reset_index(drop = False, inplace = True)
+    cart_price.groupby(by=['CustomerID'])['Cat_0'].sum()
+
+    # Correcting time range
+    transactions_per_user['count'] = 5 * transactions_per_user['count']
+    transactions_per_user['sum']   = transactions_per_user['count'] * transactions_per_user['mean']
+
+    transactions_per_user.sort_values('CustomerID', ascending = True).head(5)
+    st.dataframe(cart_price.head())
+    # st.write(cart_price.dtypes)
+
+    last_date = cart_price['InvoiceDate'].max().date()
+
+    first_registration = pd.DataFrame(cart_price.groupby(by=['CustomerID'])['InvoiceDate'].min())
+    last_purchase      = pd.DataFrame(cart_price.groupby(by=['CustomerID'])['InvoiceDate'].max())
+
+    test_fp  = first_registration.applymap(lambda x:(last_date - x.date()).days)
+    test_lp = last_purchase.applymap(lambda x:(last_date - x.date()).days)
+
+    transactions_per_user.loc[:, 'FirstPurchase'] = test_fp.reset_index(drop=False)['InvoiceDate']
+    transactions_per_user.loc[:, 'LastPurchase'] = test_lp.reset_index(drop=False)['InvoiceDate']
+
+    list_cols = ['count','min','max','mean', 'Cat_0','Cat_1','Cat_2','Cat_3','Cat_4', 'LastPurchase', 'FirstPurchase']
+    test_matrix = transactions_per_user[list_cols].to_numpy()
+
+    minmax_scaler = MinMaxScaler()
+    minmax_scaler.fit(test_matrix)
+    minmaxscaled_test_matrix = minmax_scaler.transform(test_matrix)
+
+    kmeans = st.session_state.kmeans
+    Y_last_period = kmeans.predict(minmaxscaled_test_matrix)
+    X_last_period = transactions_per_user[list_cols]
+
+    st.dataframe(Y_last_period)
+    st.dataframe(X_last_period)
+
 
