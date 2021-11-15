@@ -43,7 +43,17 @@ def get_data():
     url = str(dir_path) + "/data/data_cleaned.csv"
     return pd.read_csv(url, encoding="ISO-8859-1")
 
-@st.cache(suppress_st_warning=True)
+def return_list_of_products(count_keywords, keywords_select):
+    list_product_keywords = []
+    for k,v in count_keywords.items():
+        word = keywords_select[k]
+        if word in ['pink', 'blue', 'tag', 'green', 'orange']: continue
+        if len(word) < 3 or v < 15: continue
+        if ('+' in word) or ('/' in word): continue
+        list_product_keywords.append([word, v])
+    return list_product_keywords
+
+# @st.cache(suppress_st_warning=True)
 def app():
     st.title("Data Preparation: Feature Engineering")
 
@@ -267,32 +277,19 @@ def app():
 
     Let's create the list list_products. After we iterate through the items in the dictionary count_keywords:
     * We create the var word, we assign the value of the keyword of keywords_select[k].
-    * If the word from word var/list is in this group ['pink', 'blue', 'tag', 'green', 'orange'] then we do continue with the next iteration.
-    * If the length of word is smaller than 3 or samller than 15 then we do continue with the next iteration.
-    * If the characet + is in word or the characet / is in word then we do continue with the next iteration.
-    * We append word and the object iterator to list_products.
-    """)
-
-    st.code("""
-    list_product_keywords = []
-    for k,v in count_keywords.items():
-        word = keywords_select[k]
-        if word in ['pink', 'blue', 'tag', 'green', 'orange']: continue
-        if len(word) < 3 or v < 15: continue
-        if ('+' in word) or ('/' in word): continue
-        list_product_keywords.append([word, v])
-    list_product_keywords
-    # sort and reverse list of products
+    * If the word from word var/list is in this group ['pink', 'blue', 'tag', 'green', 'orange'] thkeywords_selectroducts
     list_product_keywords.sort(key = lambda x:x[1], reverse = True)
     print('Number of words that were kept:', len(list_product_keywords))
     """)
-    list_product_keywords = []
-    for k,v in count_keywords.items():
-        word = keywords_select[k]
-        if word in ['pink', 'blue', 'tag', 'green', 'orange']: continue
-        if len(word) < 3 or v < 15: continue
-        if ('+' in word) or ('/' in word): continue
-        list_product_keywords.append([word, v])
+
+    list_product_keywords = return_list_of_products(count_keywords=count_keywords, keywords_select=keywords_select)
+    # list_product_keywords = []
+    # for k,v in count_keywords.items():
+    #     word = keywords_select[k]
+    #     if word in ['pink', 'blue', 'tag', 'green', 'orange']: continue
+    #     if len(word) < 3 or v < 15: continue
+    #     if ('+' in word) or ('/' in word): continue
+    #     list_product_keywords.append([word, v])
     # sort and reverse list of products
     list_product_keywords.sort(key = lambda x:x[1], reverse = True)
     st.write('Number of words that were kept: `165`')
@@ -312,13 +309,14 @@ def app():
     st.dataframe(Word_X_matrix.head(5))
 
 
-    st.markdown("## Now lets add the price range to the matrix X for each description to augment the dataset: ")
+    st.markdown("""
+    ## Now lets add the price range to the matrix X for each description to augment the dataset: 
+    Shortly,we will create 5 price ranges (see the visualization of the price above `(pie chart and barchart))` to augment the dataset associated each one_hot_description with the price range
+    """)
 
     threshold = [0, 1, 2, 3, 5, 10]
     label_col = []
-    progress_bar = st.progress(0)
     for i in range(len(threshold)):
-        # progress_bar.progress((100//len(threshold))*i)
         if i == len(threshold)-1:
             col = ' > {}'.format(threshold[i])
         else:
@@ -334,7 +332,7 @@ def app():
             if j == len(threshold): break
         Word_X_matrix.loc[i, label_col[j-1]] = 1
 
-    st.write("{:<8} {:<20}\n".format('Range', 'Number of Products'))
+    st.write("{:<8} {:<20}\n".format('Range and', 'Count of Products in each price range'))
 
     for i in range(len(threshold)):
         if i == len(threshold)-1:

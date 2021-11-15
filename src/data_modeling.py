@@ -16,10 +16,17 @@ from sklearn import preprocessing, model_selection, metrics, feature_selection
 from sklearn.model_selection import GridSearchCV, learning_curve, KFold
 from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import plot_confusion_matrix
 from sklearn import neighbors, linear_model, svm, tree, ensemble
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_validate 
 from sklearn.neural_network import MLPClassifier
 from IPython.display import display, HTML
@@ -155,30 +162,36 @@ def comparing_training_loss_and_val_acc(epochs, loss_curve, validation_scores):
     )
     fig.show()
 
-def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
-        
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=0)
-    plt.yticks(tick_marks, classes)
-    
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-        
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+import pickle
+models = {"svm": svm.SVC(),
+          "KNN": KNeighborsClassifier(),
+          "Random Forest": RandomForestClassifier(),
+          "Gauusian": GaussianNB(),
+          "BaggingClassifier": BaggingClassifier(),
+          "ExtraTreesClassifier": ExtraTreesClassifier(),
+          "DecisionTreeClassifier": DecisionTreeClassifier()}
+
+# Create a function to fit and score models
+def fit_and_score(models, X_train, X_test, y_train, y_test):
+    """
+    Fits and evaluates given machine learning models.
+    models : a dict of differetn Scikit-Learn machine learning models
+    X_train : training data (no labels)
+    X_test : testing data (no labels)
+    y_train : training labels
+    y_test : test labels
+    """
+    # Set random seed
+    np.random.seed(42)
+    # Make a dictionary to keep model scores
+    model_scores = {}
+    # Loop through models
+    for name, model in models.items():
+        # Fit the model to the data
+        model.fit(X_train, y_train)
+        # Evaluate the model and append its score to model_scores
+        model_scores[name] = model.score(X_test, y_test)
+    return model_scores
 
 def MLP_Classifier():
     mlp_clf = MLPClassifier(hidden_layer_sizes=(30, 30, 30),
@@ -205,6 +218,24 @@ def MLP_Classifier():
                             n_iter_no_change=100)
     return mlp_clf
 
+def plot_cfmtrx(clf, X_test, y_test):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    plot_confusion_matrix(clf, X_test, y_test, ax=ax)
+    st.pyplot(fig)
+
+def RandomForestTraining(X_train, y_train, X_test, y_test):
+    clf_rf = RandomForestClassifier()
+    clf_rf.fit(X_train, y_train)
+    predictions = clf_rf.predict(X_test)
+    score = clf_rf.score(X_test, y_test)
+    st.markdown("##### Confusion Matrix: Random Forest Classifier")
+    plot_cfmtrx(clf_rf, X_test, y_test)
+    report = metrics.classification_report(y_test, predictions, output_dict=True)
+    df = pd.DataFrame(report).transpose()
+    st.markdown("##### Classification Report: Random Forest Classifier")
+    st.dataframe(df)
+    return clf_rf, predictions, score
+
 def app():
     st.title("DATA MODELING SECTION")
     X, y = get_x_y_train()
@@ -227,49 +258,113 @@ def app():
     `X_train = scaler.transform(X_train)`
     `X_test = scaler.transform(X_test)`
     """)
-    # scaler = StandardScaler()
-    # scaler.fit(X_train)
-    # X_train = scaler.transform(X_train)
-    # X_test = scaler.transform(X_test)
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
 
-    # with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
-    #     cv_results_fp = cross_validate(MLP_Classifier(),
-    #                             X_train,
-    #                             y_train,
-    #                             cv=10, 
-    #                             return_train_score=True, 
-    #                             scoring='accuracy')
+    st.code("""
+    cv_results_fp = cross_validate(MLP_Classifier(),
+                        X_train,
+                        y_train,
+                        cv=10, 
+                        return_train_score=True, 
+                        scoring='accuracy')
+    """)
 
-    #     for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
-    #         st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
+    with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
+        cv_results_fp = cross_validate(MLP_Classifier(),
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
 
-    # print("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
+        for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
+            st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
+
+    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
 
     st.markdown("""
     ##### Now lets train MLP properly
+    From the K-fold validation we can see that the algorithm performs quite well with `cv=10`
     """)
     
-    # Reads
-    print("key")
-    print(st.session_state.kmeans)
+    # # Reads
+    # print("key")
+    # print(st.session_state.kmeans)
 
     st.code("""
     mlp_clf = MLP_Classifier()
     predictions = mlp_clf.predict(X_test)
     metrics.accuracy_score(y_test, predictions)
     mlp_clf.fit(X_train, y_train)
-    test
     """)
 
-    # with st.spinner('MLP CLASSIFIER TRAINING: Wait for it...'):
-    #     mlp_clf = MLP_Classifier()
-    #     mlp_clf.fit(X_train, y_train)
-    #     predictions = mlp_clf.predict(X_test)
-    #     metrics.accuracy_score(y_test, predictions)
-    #     st.write(metrics.classification_report(y_test, predictions))
+    with st.spinner('MLP CLASSIFIER TRAINING: Wait for it...'):
+        mlp_clf = MLP_Classifier()
+        mlp_clf.fit(X_train, y_train)
+        predictions = mlp_clf.predict(X_test)
+        metrics.accuracy_score(y_test, predictions)
+        report = metrics.classification_report(y_test, predictions, output_dict=True)
+        df = pd.DataFrame(report).transpose()
+        st.dataframe(df)
+        # st.write(metrics.classification_report(y_test, predictions))
+
+    plot_cfmtrx(mlp_clf, X_test, y_test)
 
     st.markdown("""
-    ## Now lets train MLP Algorithm with the test set we saved in period after
+    ## Find some more classifiers that perform well utilizing the custom made function bellow:
+    """)
+    st.code("""
+    models = {"svm": svm.SVC(),
+          "KNN": KNeighborsClassifier(),
+          "Random Forest": RandomForestClassifier(),
+          "Gauusian": GaussianNB(),
+          "BaggingClassifier": BaggingClassifier(),
+          "ExtraTreesClassifier": ExtraTreesClassifier(),
+          "DecisionTreeClassifier": DecisionTreeClassifier()}
+
+    # Create a function to fit and score models
+    def fit_and_score(models, X_train, X_test, y_train, y_test):
+        Fits and evaluates given machine learning models.
+        models : a dict of differetn Scikit-Learn machine learning models
+        X_train : training data (no labels)
+        X_test : testing data (no labels)
+        y_train : training labels
+        y_test : test labels
+        # Set random seed
+        np.random.seed(42)
+        # Make a dictionary to keep model scores
+        model_scores = {}
+        # Loop through models
+        for name, model in models.items():
+            # Fit the model to the data
+            model.fit(X_train, y_train)
+            # Evaluate the model and append its score to model_scores
+            model_scores[name] = model.score(X_test, y_test)
+        return model_scores
+    """)
+    with st.spinner('Fast Training of 6 models: Wait for it...'):
+        results = fit_and_score(models, X_train, X_test, y_train, y_test)
+    st.markdown("Results for a fast training of the models:\n")
+    st.markdown(results)
+
+    st.markdown("""
+    ## From the results above we can see the three best performing algorithms are the ensemble algorithms:
+    * Ranndom Forest
+    * Extra Trees Classifier
+    * Baggin Classifier
+    So, we decided to train also these three algorithms and evaluate them.
+    """)
+
+    st.markdown("### Random Forest Classifier")
+    with st.spinner('Training Random Forest: Wait for it...'):
+        clf_rf, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)
+
+    st.markdown("""
+    # TRAINING WITH THE LAST PERIOD DATA
+    ## Now lets train MLP Algorithm with the test set we saved in the previous step and thus check if the classifiers are going to perform the same as the first_period
     """)
 
     cart_price = pd.read_csv('./src/data/test_set.csv')
@@ -321,4 +416,38 @@ def app():
     st.dataframe(Y_last_period)
     st.dataframe(X_last_period)
 
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X_last_period, Y_last_period, train_size = 0.8, random_state=42)
 
+
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    cv_results_lp = cross_validate(mlp_clf,
+                            X_train,
+                            y_train,
+                            cv=10, 
+                            return_train_score=True, 
+                            scoring='accuracy')
+
+    for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
+        print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
+
+    print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+
+    mlp_clf = MLP_Classifier()
+    mlp_clf.fit(X_train, y_train)
+    predictions = mlp_clf.predict(X_test)
+
+    metrics.accuracy_score(y_test, predictions)
+    report = metrics.classification_report(y_test, predictions, output_dict=True)
+    df = pd.DataFrame(report).transpose()
+    st.dataframe(df)
+
+    plot_cfmtrx(mlp_clf, X_test, y_test)
+
+    st.markdown("### Random Forest Classifier with Last Period Data")
+    with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
+        clf_rf, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)

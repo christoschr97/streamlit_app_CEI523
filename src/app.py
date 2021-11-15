@@ -31,12 +31,9 @@ plt.rcParams["patch.force_edgecolor"] = True
 plt.style.use('fivethirtyeight')
 mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 
-
-
 # Custom imports for pages
 from multipage import MultiPage
 import data_preparation # the data cleaning file
-import EDA # the EDA File
 import dataset_overview # the dataset overview File
 import data_modeling # the data modeling File
 import viz_and_com # the visualization and communication file
@@ -46,30 +43,28 @@ import dataset_explorer # dataset explorer
 # Create an instance of the app 
 app = MultiPage()
 
-# # Title of the main page
-# def get_data():
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     url = str(dir_path) + "/data.csv"
-#     return pd.read_csv(url, encoding="ISO-8859-1")
+st.sidebar.markdown("# CEI523 - FINAL ASSIGNMENT")
+st.sidebar.markdown("""
+## In the present web application there are 5 steps:
+* Explore the DataFrame: Understand what data and the problem
+* Data Preparation: Data Overview & Cleaning
+* Data Preparation: Feature Engineering & Data Transformation
+* Data Modeling: Train the ML Models
+* Visualization and Communication: Deploy and Express the results of the ML models
 
-# # Load the data utilizing the function get_data()
-# df = get_data()
+***Note**: Follow the steps 1 by one to get the results at the end
+""")
 
-# Write a general title
 st.title("CEI523 - FINAL ASSIGNMENT")
 st.markdown("## Welcome to our project. The goal of this project is to user Retail Data to predict sales using customer segmentation")
-
 st.markdown("### Here we is a sample of the raw dataset used in our assignment")
 
-# st.dataframe(df[:10])
-
-# Add all your applications (pages) here
-app.add_page("Explore The Dataframe", dataset_explorer.app)
-app.add_page("Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
-app.add_page("Data Preparation: Feature Engineering", data_preparation.app)
-# app.add_page("Exploratory Data Analysis", EDA.app)
-app.add_page("Dada Modelling", data_modeling.app)
-app.add_page("Visualization and Communication", viz_and_com.app) #maybe this needs to be injected to the previous section and we will see
+# Add pages to the sidebar and associate them with each app function with the corresponding file.
+app.add_page("1. Explore The Dataframe", dataset_explorer.app)
+app.add_page("2. Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
+app.add_page("3. Data Preparation: Feature Engineering", data_preparation.app)
+app.add_page("4. Data Modelling", data_modeling.app)
+app.add_page("5. Visualization and Communication", viz_and_com.app) #maybe this needs to be injected to the previous section and we will see
 
 # The main app
 app.run()
