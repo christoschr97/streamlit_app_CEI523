@@ -236,6 +236,32 @@ def RandomForestTraining(X_train, y_train, X_test, y_test):
     st.dataframe(df)
     return clf_rf, predictions, score
 
+def ExtraTreesTraining(X_train, y_train, X_test, y_test):
+    clf_et = ExtraTreesClassifier()
+    clf_et.fit(X_train, y_train)
+    predictions = clf_et.predict(X_test)
+    score = clf_et.score(X_test, y_test)
+    st.markdown("##### Confusion Matrix: Extra Trees Classifier")
+    plot_cfmtrx(clf_et, X_test, y_test)
+    report = metrics.classification_report(y_test, predictions, output_dict=True)
+    df = pd.DataFrame(report).transpose()
+    st.markdown("##### Classification Report: Extra Trees Classifier")
+    st.dataframe(df)
+    return clf_et, predictions, score
+
+def BaggingTraining(X_train, y_train, X_test, y_test):
+    clf_bg = ExtraTreesClassifier()
+    clf_bg.fit(X_train, y_train)
+    predictions = clf_bg.predict(X_test)
+    score = clf_bg.score(X_test, y_test)
+    st.markdown("##### Confusion Matrix: Bagging Classifier")
+    plot_cfmtrx(clf_bg, X_test, y_test)
+    report = metrics.classification_report(y_test, predictions, output_dict=True)
+    df = pd.DataFrame(report).transpose()
+    st.markdown("##### Classification Report: Bagging Classifier")
+    st.dataframe(df)
+    return clf_bg, predictions, score
+
 def app():
     st.title("DATA MODELING SECTION")
     X, y = get_x_y_train()
@@ -290,10 +316,6 @@ def app():
     From the K-fold validation we can see that the algorithm performs quite well with `cv=10`
     """)
     
-    # # Reads
-    # print("key")
-    # print(st.session_state.kmeans)
-
     st.code("""
     mlp_clf = MLP_Classifier()
     predictions = mlp_clf.predict(X_test)
@@ -347,6 +369,7 @@ def app():
     """)
     with st.spinner('Fast Training of 6 models: Wait for it...'):
         results = fit_and_score(models, X_train, X_test, y_train, y_test)
+
     st.markdown("Results for a fast training of the models:\n")
     st.markdown(results)
 
@@ -359,8 +382,15 @@ def app():
     """)
 
     st.markdown("### Random Forest Classifier")
+
     with st.spinner('Training Random Forest: Wait for it...'):
-        clf_rf, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)
+        clf_rf, rf_predictions, rf_score = RandomForestTraining(X_train, y_train, X_test, y_test)
+
+    with st.spinner('Training Extra Trees Classifier: Wait for it...'):
+        clf_et, et_predictions, et_score = ExtraTreesTraining(X_train, y_train, X_test, y_test)
+
+    with st.spinner('Training Bagging Classifier: Wait for it...'):
+        clf_bg, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)
 
     st.markdown("""
     # TRAINING WITH THE LAST PERIOD DATA
@@ -419,6 +449,9 @@ def app():
     X_train, X_test, y_train, y_test = model_selection.train_test_split(X_last_period, Y_last_period, train_size = 0.8, random_state=42)
 
 
+    st.markdown("""
+    ## MLP Classifier with the Last period data
+    """)
     scaler = StandardScaler()
     scaler.fit(X_train)
     X_train = scaler.transform(X_train)
@@ -451,3 +484,9 @@ def app():
     st.markdown("### Random Forest Classifier with Last Period Data")
     with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
         clf_rf, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)
+
+    with st.spinner('Training Extra Trees Classifier: Wait for it...'):
+        clf_et, et_predictions, et_score = ExtraTreesTraining(X_train, y_train, X_test, y_test)
+
+    with st.spinner('Training Bagging Classifier: Wait for it...'):
+        clf_bg, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)

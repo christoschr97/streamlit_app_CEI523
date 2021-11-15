@@ -114,7 +114,6 @@ def app():
 
 
 	# Customizable Plot
-
 	st.subheader("Customizable Plot")
 	all_columns_names = df.columns.tolist()
 	type_of_plot = st.selectbox("Select Type of Plot",["area","bar","line","hist","box","kde"])

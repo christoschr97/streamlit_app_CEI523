@@ -53,7 +53,6 @@ def return_list_of_products(count_keywords, keywords_select):
         list_product_keywords.append([word, v])
     return list_product_keywords
 
-# @st.cache(suppress_st_warning=True)
 def app():
     st.title("Data Preparation: Feature Engineering")
 
@@ -283,14 +282,6 @@ def app():
     """)
 
     list_product_keywords = return_list_of_products(count_keywords=count_keywords, keywords_select=keywords_select)
-    # list_product_keywords = []
-    # for k,v in count_keywords.items():
-    #     word = keywords_select[k]
-    #     if word in ['pink', 'blue', 'tag', 'green', 'orange']: continue
-    #     if len(word) < 3 or v < 15: continue
-    #     if ('+' in word) or ('/' in word): continue
-    #     list_product_keywords.append([word, v])
-    # sort and reverse list of products
     list_product_keywords.sort(key = lambda x:x[1], reverse = True)
     st.write('Number of words that were kept: `165`')
 
@@ -654,9 +645,10 @@ def app():
     Looks like 14 clusters is the right value for n_clusters
     """)
 
-    n_clusters = 14
-    kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, n_jobs=-1, random_state=42)
-    kmeans.fit(minmaxscaled_matrix)
+    with st.spinner('Clustering - Grouping Cutomers: Wait for it...'):
+        n_clusters = 14
+        kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, n_jobs=-1, random_state=42)
+        kmeans.fit(minmaxscaled_matrix)
 
     if 'kmeans' not in st.session_state:
         st.session_state['kmeans'] = kmeans
