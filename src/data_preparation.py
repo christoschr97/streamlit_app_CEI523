@@ -30,6 +30,7 @@ from sklearn.metrics import silhouette_samples, silhouette_score
 from IPython.display import display, HTML
 from sklearn import preprocessing, model_selection, metrics, feature_selection
 from sklearn.cluster import KMeans
+import pickle
 import plotly.graph_objs as go
 from plotly.offline import init_notebook_mode,iplot
 import os
@@ -622,7 +623,7 @@ def app():
     st.write("Run the code bellow to find the best K using k-means")
     st.code("""
     for n_clusters in range(1, 21):
-        kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, n_jobs=-1, random_state=42).fit(minmaxscaled_matrix)
+        kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, random_state=42).fit(minmaxscaled_matrix)
         inertia.append(kmeans.inertia_)
     clusters_history['inertia'] = inertia
     clusters_history
@@ -647,11 +648,15 @@ def app():
 
     with st.spinner('Clustering - Grouping Cutomers: Wait for it...'):
         n_clusters = 14
-        kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, n_jobs=-1, random_state=42)
+        kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, random_state=42)
         kmeans.fit(minmaxscaled_matrix)
 
     if 'kmeans' not in st.session_state:
         st.session_state['kmeans'] = kmeans
+    
+    # we ran the code bellow to store kmeans model once
+    # with open("./src/models/kmeans.pkl", "wb") as f:
+    #     pickle.dump(kmeans, f)
         
     clients_clusters = kmeans.predict(minmaxscaled_matrix)
     silhouette_avg = silhouette_score(minmaxscaled_matrix, clients_clusters)

@@ -8,6 +8,7 @@ import seaborn as sns
 import datetime, nltk, warnings
 import matplotlib.cm as cm
 import itertools
+import pickle
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.cluster import KMeans
@@ -16,7 +17,6 @@ from sklearn import preprocessing, model_selection, metrics, feature_selection
 from sklearn.model_selection import GridSearchCV, learning_curve, KFold
 from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import confusion_matrix
-from sklearn.metrics import plot_confusion_matrix
 from sklearn import neighbors, linear_model, svm, tree, ensemble
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import SGDClassifier
@@ -162,7 +162,6 @@ def comparing_training_loss_and_val_acc(epochs, loss_curve, validation_scores):
     )
     fig.show()
 
-import pickle
 models = {"svm": svm.SVC(),
           "KNN": KNeighborsClassifier(),
           "Random Forest": RandomForestClassifier(),
@@ -218,22 +217,47 @@ def MLP_Classifier():
                             n_iter_no_change=100)
     return mlp_clf
 
-def plot_cfmtrx(clf, X_test, y_test):
-    fig, ax = plt.subplots(figsize=(10, 10))
-    plot_confusion_matrix(clf, X_test, y_test, ax=ax)
-    st.pyplot(fig)
+def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Greens):
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+        
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=0)
+    plt.yticks(tick_marks, classes)
+    
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+        
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot()
 
 def RandomForestTraining(X_train, y_train, X_test, y_test):
     clf_rf = RandomForestClassifier()
     clf_rf.fit(X_train, y_train)
     predictions = clf_rf.predict(X_test)
     score = clf_rf.score(X_test, y_test)
-    st.markdown("##### Confusion Matrix: Random Forest Classifier")
-    plot_cfmtrx(clf_rf, X_test, y_test)
     report = metrics.classification_report(y_test, predictions, output_dict=True)
     df = pd.DataFrame(report).transpose()
     st.markdown("##### Classification Report: Random Forest Classifier")
     st.dataframe(df)
+    class_names = [i for i in range(14)]
+    cnf_matrix = confusion_matrix(y_test, predictions) 
+    np.set_printoptions(precision=2)
+    plt.figure(figsize = (10,10))
+    plot_confusion_matrix(cnf_matrix, classes=class_names, normalize = False, title='Confusion Matrix')
     return clf_rf, predictions, score
 
 def ExtraTreesTraining(X_train, y_train, X_test, y_test):
@@ -241,12 +265,15 @@ def ExtraTreesTraining(X_train, y_train, X_test, y_test):
     clf_et.fit(X_train, y_train)
     predictions = clf_et.predict(X_test)
     score = clf_et.score(X_test, y_test)
-    st.markdown("##### Confusion Matrix: Extra Trees Classifier")
-    plot_cfmtrx(clf_et, X_test, y_test)
     report = metrics.classification_report(y_test, predictions, output_dict=True)
     df = pd.DataFrame(report).transpose()
     st.markdown("##### Classification Report: Extra Trees Classifier")
     st.dataframe(df)
+    class_names = [i for i in range(14)]
+    cnf_matrix = confusion_matrix(y_test, predictions) 
+    np.set_printoptions(precision=2)
+    plt.figure(figsize = (10,10))
+    plot_confusion_matrix(cnf_matrix, classes=class_names, normalize = False, title='Confusion Matrix')
     return clf_et, predictions, score
 
 def BaggingTraining(X_train, y_train, X_test, y_test):
@@ -254,28 +281,68 @@ def BaggingTraining(X_train, y_train, X_test, y_test):
     clf_bg.fit(X_train, y_train)
     predictions = clf_bg.predict(X_test)
     score = clf_bg.score(X_test, y_test)
-    st.markdown("##### Confusion Matrix: Bagging Classifier")
-    plot_cfmtrx(clf_bg, X_test, y_test)
     report = metrics.classification_report(y_test, predictions, output_dict=True)
     df = pd.DataFrame(report).transpose()
     st.markdown("##### Classification Report: Bagging Classifier")
     st.dataframe(df)
+    class_names = [i for i in range(14)]
+    cnf_matrix = confusion_matrix(y_test, predictions) 
+    np.set_printoptions(precision=2)
+    plt.figure(figsize = (10,10))
+    plot_confusion_matrix(cnf_matrix, classes=class_names, normalize = False, title='Confusion Matrix')
     return clf_bg, predictions, score
 
+def prepare_input(cart_price_test, kmeans_trained):
+    cart_price_test['InvoiceDate'] = cart_price_test['InvoiceDate'].astype('datetime64[ns]')
+    transactions_per_user=cart_price_test.groupby(by=['CustomerID'])['Cart Price'].agg(['count','min','max','mean','sum'])
+    for i in range(5):
+        col = 'Cat_{}'.format(i)
+        transactions_per_user.loc[:,col] = cart_price_test.groupby(by=['CustomerID'])[col].sum() / transactions_per_user['sum']*100
+
+    transactions_per_user.reset_index(drop = False, inplace = True)
+    cart_price_test.groupby(by=['CustomerID'])['Cat_0'].sum()
+
+    # Correcting time range
+    transactions_per_user['count'] = 5 * transactions_per_user['count']
+    transactions_per_user['sum']   = transactions_per_user['count'] * transactions_per_user['mean']
+
+    transactions_per_user.sort_values('CustomerID', ascending = True).head(5)
+    last_date = cart_price_test['InvoiceDate'].max().date()
+
+    first_registration = pd.DataFrame(cart_price_test.groupby(by=['CustomerID'])['InvoiceDate'].min())
+    last_purchase      = pd.DataFrame(cart_price_test.groupby(by=['CustomerID'])['InvoiceDate'].max())
+
+    test_fp  = first_registration.applymap(lambda x:(last_date - x.date()).days)
+    test_lp = last_purchase.applymap(lambda x:(last_date - x.date()).days)
+
+    transactions_per_user.loc[:, 'FirstPurchase'] = test_fp.reset_index(drop=False)['InvoiceDate']
+    transactions_per_user.loc[:, 'LastPurchase'] = test_lp.reset_index(drop=False)['InvoiceDate']
+
+    list_cols = ['count','min','max','mean', 'Cat_0','Cat_1','Cat_2','Cat_3','Cat_4', 'LastPurchase', 'FirstPurchase']
+    test_matrix = transactions_per_user[list_cols].to_numpy()
+
+    minmax_scaler = MinMaxScaler()
+    minmax_scaler.fit(test_matrix)
+    minmaxscaled_test_matrix = minmax_scaler.transform(test_matrix)
+    X = transactions_per_user[list_cols]
+    Y = kmeans_trained.predict(minmaxscaled_test_matrix)
+
+    return X, Y
+  
 def app():
     st.title("DATA MODELING SECTION")
-    X, y = get_x_y_train()
+    X_first_period, y_first_period = get_x_y_train()
 
-    st.write("Length: {}".format(len(X)))
-    st.dataframe(X.head(5))
-    st.write("Length: {}".format(len(y)))
-    st.dataframe(y.head(5))
+    st.write("Length: {}".format(len(X_first_period)))
+    st.dataframe(X_first_period.head(5))
+    st.write("Length: {}".format(len(y_first_period)))
+    st.dataframe(y_first_period.head(5))
 
     st.markdown("""
     ## We have to split our dataset to X_train, X_test, y_train, y_test 
     """)
 
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, train_size = 0.8, random_state=42)
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X_first_period, y_first_period, train_size = 0.8, random_state=42)
 
     st.markdown("""
     ## We need to scale our data
@@ -284,6 +351,7 @@ def app():
     `X_train = scaler.transform(X_train)`
     `X_test = scaler.transform(X_test)`
     """)
+
     scaler = StandardScaler()
     scaler.fit(X_train)
     X_train = scaler.transform(X_train)
@@ -315,7 +383,7 @@ def app():
     ##### Now lets train MLP properly
     From the K-fold validation we can see that the algorithm performs quite well with `cv=10`
     """)
-    
+
     st.code("""
     mlp_clf = MLP_Classifier()
     predictions = mlp_clf.predict(X_test)
@@ -327,17 +395,14 @@ def app():
         mlp_clf = MLP_Classifier()
         mlp_clf.fit(X_train, y_train)
         predictions = mlp_clf.predict(X_test)
-        metrics.accuracy_score(y_test, predictions)
         report = metrics.classification_report(y_test, predictions, output_dict=True)
         df = pd.DataFrame(report).transpose()
         st.dataframe(df)
-        # st.write(metrics.classification_report(y_test, predictions))
-
-    plot_cfmtrx(mlp_clf, X_test, y_test)
 
     st.markdown("""
     ## Find some more classifiers that perform well utilizing the custom made function bellow:
     """)
+    
     st.code("""
     models = {"svm": svm.SVC(),
           "KNN": KNeighborsClassifier(),
@@ -367,6 +432,7 @@ def app():
             model_scores[name] = model.score(X_test, y_test)
         return model_scores
     """)
+
     with st.spinner('Fast Training of 6 models: Wait for it...'):
         results = fit_and_score(models, X_train, X_test, y_train, y_test)
 
@@ -397,61 +463,19 @@ def app():
     ## Now lets train MLP Algorithm with the test set we saved in the previous step and thus check if the classifiers are going to perform the same as the first_period
     """)
 
-    cart_price = pd.read_csv('./src/data/test_set.csv')
-    cart_price['InvoiceDate'] = cart_price['InvoiceDate'].astype('datetime64[ns]')
-    print(cart_price.dtypes) 
-
-    st.markdown("""
-    ##### Test set from Last Period:
-    For these we need to use the test_set we prepared in the Feature Engineering section and reconstruct the input X as X_lp (Last Period) and the Y_lp respectively
-    """)
-    transactions_per_user=cart_price.groupby(by=['CustomerID'])['Cart Price'].agg(['count','min','max','mean','sum'])
-    for i in range(5):
-        col = 'Cat_{}'.format(i)
-        transactions_per_user.loc[:,col] = cart_price.groupby(by=['CustomerID'])[col].sum() / transactions_per_user['sum']*100
-
-    transactions_per_user.reset_index(drop = False, inplace = True)
-    cart_price.groupby(by=['CustomerID'])['Cat_0'].sum()
-
-    # Correcting time range
-    transactions_per_user['count'] = 5 * transactions_per_user['count']
-    transactions_per_user['sum']   = transactions_per_user['count'] * transactions_per_user['mean']
-
-    transactions_per_user.sort_values('CustomerID', ascending = True).head(5)
-    st.dataframe(cart_price.head())
-    # st.write(cart_price.dtypes)
-
-    last_date = cart_price['InvoiceDate'].max().date()
-
-    first_registration = pd.DataFrame(cart_price.groupby(by=['CustomerID'])['InvoiceDate'].min())
-    last_purchase      = pd.DataFrame(cart_price.groupby(by=['CustomerID'])['InvoiceDate'].max())
-
-    test_fp  = first_registration.applymap(lambda x:(last_date - x.date()).days)
-    test_lp = last_purchase.applymap(lambda x:(last_date - x.date()).days)
-
-    transactions_per_user.loc[:, 'FirstPurchase'] = test_fp.reset_index(drop=False)['InvoiceDate']
-    transactions_per_user.loc[:, 'LastPurchase'] = test_lp.reset_index(drop=False)['InvoiceDate']
-
-    list_cols = ['count','min','max','mean', 'Cat_0','Cat_1','Cat_2','Cat_3','Cat_4', 'LastPurchase', 'FirstPurchase']
-    test_matrix = transactions_per_user[list_cols].to_numpy()
-
-    minmax_scaler = MinMaxScaler()
-    minmax_scaler.fit(test_matrix)
-    minmaxscaled_test_matrix = minmax_scaler.transform(test_matrix)
-
-    kmeans = st.session_state.kmeans
-    Y_last_period = kmeans.predict(minmaxscaled_test_matrix)
-    X_last_period = transactions_per_user[list_cols]
-
-    st.dataframe(Y_last_period)
-    st.dataframe(X_last_period)
-
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(X_last_period, Y_last_period, train_size = 0.8, random_state=42)
-
-
     st.markdown("""
     ## MLP Classifier with the Last period data
     """)
+
+    ## import the kmeans from the previous stage (Feature Engineering) because we need it to reconstruct the data
+    with open("./src/models/kmeans.pkl", "rb") as f:
+        kmeans_trained = pickle.load(f)
+
+    cart_price_test = pd.read_csv('./src/data/test_set.csv')
+    X_last_period, y_last_period = prepare_input(cart_price_test, kmeans_trained)
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X_last_period, y_last_period, train_size = 0.8, random_state=42)
+
     scaler = StandardScaler()
     scaler.fit(X_train)
     X_train = scaler.transform(X_train)
@@ -479,14 +503,12 @@ def app():
     df = pd.DataFrame(report).transpose()
     st.dataframe(df)
 
-    plot_cfmtrx(mlp_clf, X_test, y_test)
-
     st.markdown("### Random Forest Classifier with Last Period Data")
     with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
-        clf_rf, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)
+        clf_rf_lp, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)
 
     with st.spinner('Training Extra Trees Classifier: Wait for it...'):
-        clf_et, et_predictions, et_score = ExtraTreesTraining(X_train, y_train, X_test, y_test)
+        clf_et_lp, et_predictions, et_score = ExtraTreesTraining(X_train, y_train, X_test, y_test)
 
     with st.spinner('Training Bagging Classifier: Wait for it...'):
-        clf_bg, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)
+        clf_bg_lp, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)
