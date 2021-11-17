@@ -42,7 +42,7 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 def get_x_y_train():
     X = pd.read_csv('./src/data/x_data.csv')
     y = pd.read_csv('./src/data/y_data.csv')
-    return X, y
+    return X, y['cluster']
 
 
 def clusters_histogram(y_cluster, title ):
@@ -366,18 +366,18 @@ def app():
                         scoring='accuracy')
     """)
 
-    with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
-        cv_results_fp = cross_validate(MLP_Classifier(),
-                                X_train,
-                                y_train,
-                                cv=10, 
-                                return_train_score=True, 
-                                scoring='accuracy')
+    # with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
+    #     cv_results_fp = cross_validate(MLP_Classifier(),
+    #                             X_train,
+    #                             y_train,
+    #                             cv=10, 
+    #                             return_train_score=True, 
+    #                             scoring='accuracy')
 
-        for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
-            st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
+    #     for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
+    #         st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
 
-    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
+    # st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
 
     st.markdown("""
     ##### Now lets train MLP properly
@@ -459,12 +459,12 @@ def app():
         clf_bg, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)
 
     st.markdown("""
-    # TRAINING WITH THE LAST PERIOD DATA
-    ## Now lets train MLP Algorithm with the test set we saved in the previous step and thus check if the classifiers are going to perform the same as the first_period
+    ## TRAINING WITH THE LAST PERIOD DATA
+    #### Now lets train MLP Algorithm with the test set we saved in the previous step and thus check if the classifiers are going to perform the same as the first_period
     """)
 
     st.markdown("""
-    ## MLP Classifier with the Last period data
+    #### MLP Classifier with the Last period data
     """)
 
     ## import the kmeans from the previous stage (Feature Engineering) because we need it to reconstruct the data
@@ -481,18 +481,19 @@ def app():
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
 
-    cv_results_lp = cross_validate(mlp_clf,
-                            X_train,
-                            y_train,
-                            cv=10, 
-                            return_train_score=True, 
-                            scoring='accuracy')
+    # with st.spinner('10-fold training and validation with the Last Date: Wait for it...'):
+    #     cv_results_lp = cross_validate(mlp_clf,
+    #                             X_train,
+    #                             y_train,
+    #                             cv=10, 
+    #                             return_train_score=True, 
+    #                             scoring='accuracy')
 
-    for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
-        print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
+    #     for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
+    #         print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
 
-    print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
-    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    # print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    # st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
 
     mlp_clf = MLP_Classifier()
     mlp_clf.fit(X_train, y_train)
@@ -512,3 +513,88 @@ def app():
 
     with st.spinner('Training Bagging Classifier: Wait for it...'):
         clf_bg_lp, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)
+
+    
+    st.markdown("""
+    ## TRAINING WITH THE WHOLE DATASET
+    #### Now lets train The same Algorithms with the test set we saved in the previous step and thus check if the classifiers are going to perform the same as the first_period
+    """)
+
+    st.markdown("""
+    #### MLP Classifier with the whole dataset
+    """)
+    st.dataframe(X_first_period)
+    st.dataframe(X_last_period)
+    st.dataframe(y_first_period)
+    st.dataframe(y_last_period)
+    st.write(y_first_period.shape)
+    st.write(y_last_period.shape)
+    
+    X = np.concatenate((X_first_period, X_last_period))
+    Y = np.concatenate((y_first_period, y_last_period))
+    st.write(X.shape)
+    st.write(Y.shape)
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, Y, train_size = 0.8, random_state=42)
+
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
+        cv_results = cross_validate(MLP_Classifier(),
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
+        
+        for k_fullData, s_fullData in enumerate(cv_results['test_score']):
+            print("Fold {} with Test Accuracy Score: {}".format(k_fullData, s_fullData))
+
+        st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results['test_score'])/10))
+    
+    mlp_clf = MLP_Classifier()
+
+    mlp_clf.fit(X_train, y_train)
+
+    predictions = mlp_clf.predict(X_test)
+
+    metrics.accuracy_score(y_test, predictions)
+
+    class_names = [i for i in range(14)]
+    cnf_matrix = confusion_matrix(y_test, predictions) 
+    np.set_printoptions(precision=2)
+    plt.figure(figsize = (10, 10))
+    plot_confusion_matrix(cnf_matrix, classes=class_names, normalize = False, title='Confusion matrix')
+
+    #save MLP
+    # with open('./src/models/kmeans.pkl','wb') as f:
+    #     pickle.dump(mlp_clf, f)
+
+
+    st.markdown("### Random Forest Classifier with Last Period Data")
+    with st.spinner('Training Random Forest with Whole Dataset: Wait for it...'):
+        clf_rf_gen, predictions, score = RandomForestTraining(X_train, y_train, X_test, y_test)
+        # save Random Forest
+        # with open('./src/models/random_forest.pkl','wb') as f:
+        #     pickle.dump(clf_rf_gen, f)
+
+    with st.spinner('Training Extra Trees Classifier Whole Dataset: Wait for it...'):
+        clf_et_gen, et_predictions, et_score = ExtraTreesTraining(X_train, y_train, X_test, y_test)
+        # save Extra Trees
+        # with open('./src/models/extra_trees.pkl','wb') as f:
+        #     pickle.dump(clf_et_gen, f)
+
+    with st.spinner('Training Bagging Classifier Whole Dataset: Wait for it...'):
+        clf_bg_gen, bg_predictions, bg_score = BaggingTraining(X_train, y_train, X_test, y_test)
+        # save Bagging Classifier
+        # with open('./src/models/bagging.pkl','wb') as f:
+        #     pickle.dump(clf_bg_gen, f)
+
+
+
+
+
+

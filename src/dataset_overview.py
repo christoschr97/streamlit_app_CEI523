@@ -230,6 +230,7 @@ def app():
   """)
 
   ## DONT RUN THE CODE BECAUSE IS VERY TIME CONSUMING ##
+  ## LOAD THE CLEANED DATASET STRAIGHTFORWARDLY ## 
 
   # # Mark the negative entries to subset them out of the data later
   # # create a list of negative quantities that must be removed and they have identical
