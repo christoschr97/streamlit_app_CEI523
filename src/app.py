@@ -42,7 +42,7 @@ import dataset_explorer # dataset explorer
 
 # Create an instance of the app 
 app = MultiPage()
-
+st.set_page_config(layout="wide")
 st.sidebar.markdown("# CEI523 - FINAL ASSIGNMENT")
 st.sidebar.markdown("""
 ## In the present web application there are 5 steps:

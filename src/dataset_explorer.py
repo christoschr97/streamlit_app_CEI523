@@ -14,6 +14,7 @@ import matplotlib
 matplotlib.use('Agg')
 import seaborn as sns
 import eda_summary as eda
+import graphs
 
 
 def get_raw_cleaned_df():
@@ -49,6 +50,28 @@ def app():
         st.dataframe(eda.summary_table(data))
         st.dataframe(data.describe())
 
+    st.header('Data Visualization')
+
+    height, width, margin = 450, 1500, 10
+
+    st.subheader('Country Transactions Distribution')
+
+    select_city_eda = st.selectbox(
+        'Select the City',
+        ['All'] + [i for i in data['Country'].unique()]
+    )
+
+# TODO: GET UNIQUE TRANSACTIONS
+    temp = data.groupby(by=['Country', 'InvoiceNo'], as_index=False)['InvoiceDate'].count()
+    temp.rename(columns={"InvoiceDate": "Transactions"}, inplace=True)
+    if select_city_eda == 'All':
+        fig = graphs.plot_histogram(data=temp, x='Country', nbins=50, height=height, width=width, margin=margin)
+    else:
+        fig = graphs.plot_histogram(
+            data = temp.loc[temp['Country'] == select_city_eda], x="Transactions", nbins=50, height=height, width=width, margin=margin)
+                      
+    st.plotly_chart(fig)
+
     st.markdown("""
     ### To Do:
     ##### From the Descriptive statistics we need to do in the next steps:**
@@ -74,7 +97,7 @@ def app():
     * `data_cleaned_2.csv` is the cleaned dataset (see following steps)
     """)
 
-    def file_selector(folder_path='./src/data'):
+    def file_selector(folder_path='./src/data_to_select'):
         filenames = os.listdir(folder_path)
         selected_filename = st.selectbox('Select A file', filenames)
         return os.path.join(folder_path, selected_filename)
