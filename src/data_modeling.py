@@ -40,8 +40,8 @@ mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 
 
 def get_x_y_train():
-    X = pd.read_csv('./src/data/x_data.csv')
-    y = pd.read_csv('./src/data/y_data.csv')
+    X = pd.read_csv('./src/data/x_data_new.csv')
+    y = pd.read_csv('./src/data/y_data_new.csv')
     return X, y['cluster']
 
 
@@ -366,18 +366,18 @@ def app():
                         scoring='accuracy')
     """)
 
-    # with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
-    #     cv_results_fp = cross_validate(MLP_Classifier(),
-    #                             X_train,
-    #                             y_train,
-    #                             cv=10, 
-    #                             return_train_score=True, 
-    #                             scoring='accuracy')
+    with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
+        cv_results_fp = cross_validate(MLP_Classifier(),
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
 
-    #     for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
-    #         st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
+        for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
+            st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
 
-    # st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
+    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
 
     st.markdown("""
     ##### Now lets train MLP properly
@@ -440,7 +440,7 @@ def app():
     st.markdown(results)
 
     st.markdown("""
-    ## From the results above we can see the three best performing algorithms are the ensemble algorithms:
+    #### From the results above we can see the three best performing algorithms are the ensemble algorithms:
     * Ranndom Forest
     * Extra Trees Classifier
     * Baggin Classifier
@@ -481,19 +481,19 @@ def app():
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # with st.spinner('10-fold training and validation with the Last Date: Wait for it...'):
-    #     cv_results_lp = cross_validate(mlp_clf,
-    #                             X_train,
-    #                             y_train,
-    #                             cv=10, 
-    #                             return_train_score=True, 
-    #                             scoring='accuracy')
+    with st.spinner('10-fold training and validation with the Last Date: Wait for it...'):
+        cv_results_lp = cross_validate(mlp_clf,
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
 
-    #     for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
-    #         print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
+        for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
+            print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
 
-    # print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
-    # st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
 
     mlp_clf = MLP_Classifier()
     mlp_clf.fit(X_train, y_train)
@@ -518,6 +518,8 @@ def app():
     st.markdown("""
     ## TRAINING WITH THE WHOLE DATASET
     #### Now lets train The same Algorithms with the test set we saved in the previous step and thus check if the classifiers are going to perform the same as the first_period
+    * As the results suggest from the results above (First period and last period training), we can generalize our results for the whole year
+    * The reason for selecting two seperate periods to separately train and test it is because we cannot train a model with the first 10 months of the year and then test it to the last 2.
     """)
 
     st.markdown("""

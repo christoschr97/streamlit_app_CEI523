@@ -58,7 +58,6 @@ def app():
     st.title("Data Preparation: Feature Engineering")
 
     ########### DATA PREPARATION: FEATURE ENGINEERING #################
-
     def get_data_cleaned():
         dir_path = os.path.dirname(os.path.realpath(__file__))
         url = str(dir_path) + "/data/data_cleaned_2.csv"
@@ -496,8 +495,18 @@ def app():
 
     st.markdown("""
     ### Taking Care of Data Over Time
+    We have to remember (see code bellow) that we have data from 1 exact year. 
+    * The main objectives of this notebook is to develop a model capable of characterizing and anticipating the habits of the customers visiting the site from their first visit. 
+    * How can we test the model in a realistic way?, We can split the dataset by keeping the first 10 months for training and development of the model and the last two months for testing how good our model is. Nice approach? Now let's define a var date_limit which is going to work as the limit day for comparison.
+    """)
 
-    The main objectives of this notebook is to develop a model capable of characterizing and anticipating the habits of the customers visiting the site from their first visit. How can we test the model in a realistic way?, We can split the dataset by keeping the first 10 months for training and development of the model and the last two months for testing how good our model is. Nice approach? Now let's define a var date_limit which is going to work as the limit day for comparison.
+    st.code("""
+    # Original start dataframe
+    df['InvoiceDate'] = df['InvoiceDate'].astype('datetime64[ns]')
+    df.InvoiceDate.max(), df.InvoiceDate.min()
+    """)
+    st.markdown("""
+    **Output:** (Timestamp('2011-12-09 12:50:00'), Timestamp('2010-12-01 08:26:00'))
     """)
 
     import datetime
@@ -595,12 +604,10 @@ def app():
 
     st.markdown("""
     ## Creating Customers Categories
-
     #### Data Encoding
-
-    *`transactions_per_user` is a DF that contains a summary of all the transaction that were made by each client. 
-    *This information will be used to characterize the different types of customers and only keep a subset of variables:
-    *Let's create a list call list_cols that will hold the features that are going to be used for the model to learn patterns in order to define the clusters.
+    * `transactions_per_user` is a DF that contains a summary of all the transaction that were made by each client. 
+    * This information will be used to characterize the different types of customers and only keep a subset of variables:
+    * Let's create a list call list_cols that will hold the features that are going to be used for the model to learn patterns in order to define the clusters.
     """)
     list_cols = ['count','min','max','mean','Cat_0','Cat_1','Cat_2','Cat_3','Cat_4', 'LastPurchase', 'FirstPurchase']
 
