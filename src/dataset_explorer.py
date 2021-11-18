@@ -56,20 +56,10 @@ def app():
 
     st.subheader('Country Transactions Distribution')
 
-    select_city_eda = st.selectbox(
-        'Select the City',
-        ['All'] + [i for i in data['Country'].unique()]
-    )
-
-# TODO: GET UNIQUE TRANSACTIONS
+    # TODO: GET UNIQUE TRANSACTIONS
     temp = data.groupby(by=['Country', 'InvoiceNo'], as_index=False)['InvoiceDate'].count()
     temp.rename(columns={"InvoiceDate": "Transactions"}, inplace=True)
-    if select_city_eda == 'All':
-        fig = graphs.plot_histogram(data=temp, x='Country', nbins=50, height=height, width=width, margin=margin)
-    else:
-        fig = graphs.plot_histogram(
-            data = temp.loc[temp['Country'] == select_city_eda], x="Transactions", nbins=50, height=height, width=width, margin=margin)
-                      
+    fig = graphs.plot_histogram(data=temp, x='Country', nbins=50, height=height, width=width, margin=margin)
     st.plotly_chart(fig)
 
     st.markdown("""
@@ -84,6 +74,8 @@ def app():
     """)
 
     # # DATASET EXPLORER ##
+
+    st.markdown("# Explore The DataFrame Interactively")
 
     html_temp = \
         """

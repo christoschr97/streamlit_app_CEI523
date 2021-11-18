@@ -38,11 +38,11 @@ import dataset_overview # the dataset overview File
 import data_modeling # the data modeling File
 import viz_and_com # the visualization and communication file
 import dataset_explorer # dataset explorer
-
+import intro # introductory page
 
 # Create an instance of the app 
 app = MultiPage()
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 st.sidebar.markdown("# CEI523 - FINAL ASSIGNMENT")
 st.sidebar.markdown("""
 ## In the present web application there are 5 steps:
@@ -55,16 +55,13 @@ st.sidebar.markdown("""
 ***Note**: Follow the steps 1 by one to get the results at the end
 """)
 
-st.title("CEI523 - FINAL ASSIGNMENT")
-st.markdown("## Welcome to our project. The goal of this project is to user Retail Data to predict sales using customer segmentation")
-st.markdown("### Here we is a sample of the raw dataset used in our assignment")
-
 # Add pages to the sidebar and associate them with each app function with the corresponding file.
-app.add_page("1. Explore The Dataframe", dataset_explorer.app)
-app.add_page("2. Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
-app.add_page("3. Data Preparation: Feature Engineering", data_preparation.app)
-app.add_page("4. Data Modelling", data_modeling.app)
-app.add_page("5. Visualization and Communication", viz_and_com.app) #maybe this needs to be injected to the previous section and we will see
+app.add_page("1. Introduction to the Problem and the Domain", intro.app)
+app.add_page("2. Explore The Dataframe", dataset_explorer.app)
+app.add_page("3. Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
+app.add_page("4. Data Preparation: Feature Engineering", data_preparation.app)
+app.add_page("5. Data Modelling", data_modeling.app)
+app.add_page("6. Visualization and Communication", viz_and_com.app) #maybe this needs to be injected to the previous section and we will see
 
 # The main app
 app.run()
