@@ -287,8 +287,10 @@ def app():
     st.title("DATA MODELING SECTION")
     st.write("""
     ### Training and testing the models:
-    To train the 4 models we will follow the process bellow:
-    - The Train and test Datasets are splitted into two parts: `First Period Dataset`
+    To train the 4 models we will follow the process bellow (as explained in FE section):
+    - The Train and test Datasets are splitted into two parts: `First Period Dataset`, `Last Period Dataset`
+    - The `Last Period Dataset` will contain the data of the last two months of the year and the `First Period Dataset` will contain the first 10 months of the year.
+    - The reason is because of seasonality. We have to remember that we have data for exact on year
     """)
     X_first_period, y_first_period = get_x_y_train()
 
@@ -517,12 +519,16 @@ def app():
     st.markdown("""
     #### MLP Classifier with the whole dataset
     """)
+
+    st.write("#### X_First_Period")
     st.dataframe(X_first_period)
+    st.write("#### X_Last_Period")
     st.dataframe(X_last_period)
+    st.write("#### y_First_Period")
     st.dataframe(y_first_period)
+    y_last_period.rename(columns = {0: 'Cluster'}, inplace=True)
+    st.write("#### y_last_Period")
     st.dataframe(y_last_period)
-    st.write(y_first_period.shape)
-    st.write(y_last_period.shape)
     
     X = np.concatenate((X_first_period, X_last_period))
     Y = np.concatenate((y_first_period, y_last_period))
@@ -536,7 +542,7 @@ def app():
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
     
-    with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
+    with st.spinner('10-fold validation with Full Period Data: Wait for it...'):
         cv_results = cross_validate(MLP_Classifier(),
                                 X_train,
                                 y_train,
@@ -566,7 +572,6 @@ def app():
     #save MLP
     # with open('./src/models/kmeans.pkl','wb') as f:
     #     pickle.dump(mlp_clf, f)
-
 
     st.markdown("### Random Forest Classifier with Last Period Data")
     with st.spinner('Training Random Forest with Whole Dataset: Wait for it...'):

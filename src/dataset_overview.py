@@ -54,12 +54,12 @@ def app():
       there are several ways to deal with missing values:
 
       Impute values for the CustomerID and Description, in this case it is impossible, does not make sense.
+
       Apply clustering analysis and see patterns in those unknown clients and unknown description of products. Once these patterns are detected we can assign a labels for them and use these labels as a generic CustomerID and Description.
       Delete the rows where these missing values are found.
   """)
 
-  st.write(" ")
-  st.write("By utilizing the code below we can drop the rows where the customer is NaN and thus we cannot utilize them in our project")
+  st.write("##### By utilizing the code below we can drop the rows where the customer is NaN and thus we cannot utilize them in our project")
 
   st.code("df.dropna(axis = 0, subset = ['CustomerID'], inplace = True")
   df.dropna(axis = 0, subset = ['CustomerID'], inplace = True)
@@ -73,7 +73,6 @@ def app():
 
   duplicates = df.duplicated().sum()
   st.write("We have now to check if there are duplicated values in our dataset: {} rows in total.".format(duplicates))
-
 
   st.write("Lets see a sample of them: ")
   st.dataframe(df[df.duplicated()].head(5))
@@ -108,7 +107,6 @@ def app():
   ax.set(title="Countries orders", ylabel="Count")
   st.pyplot(fig=fig)
 
-
   ### Now lets see the products the transactions and the customers
   st.markdown("""
   ##### Customers, Products and Transaction
@@ -141,11 +139,10 @@ def app():
   2. We have transactions that start with the 'C' letter and this imply that they were canceled
   """)
 
-
   #### CANCELED ORDERS IN DATA CLEANING 
 
   st.markdown("""
-  #### Tackle with Negative Quantities
+  #### Tackle with Canceled Orders
   Run a describe to remember what we have
   """)
   st.dataframe(df.describe())
@@ -172,8 +169,16 @@ def app():
   ax.set_ylim([0, 100])
   st.pyplot(fig=fig)
 
+  st.write("""
+  ##### As we can see the majority of canceled orders are big so we cannot just drop them
+  - We will find the cancel orders if they have counterparts and drop them
+  - We will drop also the negative quantities
+  - We will recheck the df if any negative quantity remains
+  \n 
+  """)
+
   st.markdown("""
-  ##### Lets take a Cancelation Order and visualize the quantities to understand what is happening.
+  #### Lets take a Cancelation Order and visualize the quantities to understand what is happening.
   """)
   st.code("df[(df['StockCode'] == '35004C') & (df['CustomerID'] == 15311)]")
   st.dataframe(df[(df['StockCode'] == '35004C') & (df['CustomerID'] == 15311)])
@@ -259,9 +264,6 @@ def app():
   st.code("len(neg_quantity), len(risk_pos_quantity)")
   st.write("negative quantities: {}, positive quantities that were canceled: {}".format(8795, 3224))
 
-
-  st.code("len(neg_quantity), len(risk_pos_quantity)")
-
   st.markdown("Run the bellow to drop them")
   st.code("""
   df.drop(neg_quantity, axis = 0, inplace = True)
@@ -274,14 +276,13 @@ def app():
   # df.drop(neg_quantity, axis = 0, inplace = True)
   # df.drop(risk_pos_quantity, axis = 0, inplace = True)
 
-  #### get_data
+  #### get_data that are cleaned
   def get_data_cleaned():
       dir_path = os.path.dirname(os.path.realpath(__file__))
       url = str(dir_path) + "/data/data_cleaned_2.csv"
       return pd.read_csv(url, encoding="ISO-8859-1", dtype={'CustomerID': str, 'InvoiceNo': str})
 
   df = get_data_cleaned()
-  df.describe()
 
   st.markdown("""
   From the describe() above we can see that we still have negative values. Lets remove the stockcodes that are not casual transactions and then come back again to recheck everything
@@ -290,6 +291,16 @@ def app():
   """)
 
   st.write("Remove also the special stockcodes: ".format(df[df['StockCode'].str.contains('^[a-zA-Z]+', regex=True)]['StockCode'].unique()))
+
+  st.code("""
+    df = df[df['StockCode']!= 'POST']
+    df = df[df['StockCode']!= 'D']
+    df = df[df['StockCode']!= 'C2']
+    df = df[df['StockCode']!= 'M']
+    df = df[df['StockCode']!= 'BANK CHARGES']
+    df = df[df['StockCode']!= 'PADS']
+    df = df[df['StockCode']!= 'DOT']
+  """)
 
   df = df[df['StockCode']!= 'POST']
   df = df[df['StockCode']!= 'D']
