@@ -325,18 +325,18 @@ def app():
                         scoring='accuracy')
     """)
 
-    # with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
-    #     cv_results_fp = cross_validate(MLP_Classifier(),
-    #                             X_train,
-    #                             y_train,
-    #                             cv=10, 
-    #                             return_train_score=True, 
-    #                             scoring='accuracy')
+    with st.spinner('MLP 10-FOLD VALIDATION CLASSIFIER TRAINING: Wait for it...'):
+        cv_results_fp = cross_validate(MLP_Classifier(),
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
 
-    #     # for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
-    #     #     st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
+        for k_fp, s_fp in enumerate(cv_results_fp['test_score']):
+            st.write("Fold {} with Test Accuracy Score: {}".format(k_fp, s_fp))
 
-    # st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
+    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_fp['test_score'])/10))
 
     st.markdown("""
     ##### Now lets train MLP properly
@@ -458,19 +458,19 @@ def app():
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # with st.spinner('10-fold training and validation with the Last Date: Wait for it...'):
-    #     cv_results_lp = cross_validate(mlp_clf,
-    #                             X_train,
-    #                             y_train,
-    #                             cv=10, 
-    #                             return_train_score=True, 
-    #                             scoring='accuracy')
+    with st.spinner('10-fold training and validation with the Last Date: Wait for it...'):
+        cv_results_lp = cross_validate(mlp_clf,
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
 
-    #     for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
-    #         print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
+        for k_lp, s_lp in enumerate(cv_results_lp['test_score']):
+            print("Fold {} with Test Accuracy Score: {}".format(k_lp, s_lp))
 
-    # print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
-    # st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    print("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
+    st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results_lp['test_score'])/10))
 
     mlp_clf = MLP_Classifier()
     mlp_clf.fit(X_train, y_train)
@@ -536,18 +536,18 @@ def app():
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
     
-    # with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
-    #     cv_results = cross_validate(MLP_Classifier(),
-    #                             X_train,
-    #                             y_train,
-    #                             cv=10, 
-    #                             return_train_score=True, 
-    #                             scoring='accuracy')
+    with st.spinner('Training Random Forest with Last Period Data: Wait for it...'):
+        cv_results = cross_validate(MLP_Classifier(),
+                                X_train,
+                                y_train,
+                                cv=10, 
+                                return_train_score=True, 
+                                scoring='accuracy')
         
-    #     for k_fullData, s_fullData in enumerate(cv_results['test_score']):
-    #         print("Fold {} with Test Accuracy Score: {}".format(k_fullData, s_fullData))
+        for k_fullData, s_fullData in enumerate(cv_results['test_score']):
+            print("Fold {} with Test Accuracy Score: {}".format(k_fullData, s_fullData))
 
-    #     st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results['test_score'])/10))
+        st.write("Average Test Accuracy Score: {}".format(np.sum(cv_results['test_score'])/10))
     
     mlp_clf = MLP_Classifier()
 
@@ -577,7 +577,7 @@ def app():
         st.write("#### Clusters Prediction Histogram: Baggin Classifier")
         clusters_predictions_histogram(y_test, rf_predictions, 'Y Sets')
 
-        # save Random Forest
+        # # save Random Forest
         # with open('./src/models/random_forest.pkl','wb') as f:
         #     pickle.dump(clf_rf_gen, f)
 
@@ -589,7 +589,7 @@ def app():
         st.write("#### Clusters Prediction Histogram: Baggin Classifier")
         clusters_predictions_histogram(y_test, et_predictions, 'Y Sets')
 
-        # save Extra Trees
+        # # save Extra Trees
         # with open('./src/models/extra_trees.pkl','wb') as f:
         #     pickle.dump(clf_et_gen, f)
 
@@ -601,7 +601,7 @@ def app():
         st.write("#### Clusters Prediction Histogram: Baggin Classifier")
         clusters_predictions_histogram(y_test, bg_predictions, 'Y Sets')
 
-        # save Bagging Classifier
+        # # save Bagging Classifier
         # with open('./src/models/bagging.pkl','wb') as f:
         #     pickle.dump(clf_bg_gen, f)
 
