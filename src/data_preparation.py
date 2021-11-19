@@ -678,9 +678,10 @@ def app():
     graph_component_silhouette(n_clusters, [-0.15, 0.55], len(minmaxscaled_matrix), sample_silhouette_values, clients_clusters)
 
     st.markdown("""
-    Some of the clusters are indeed disjoint (at least, in a global way). It remains to understand the habits of the customers in each cluster. To do so, we start by adding to the selected_customers dataframe a variable that defines the cluster to which each client belongs:
+    Some of the clusters are indeed disjoint (at least, in a global way). It remains to understand the habits of the customers in each cluster. To do so, we start by adding to the selected_customers dataframe a variable that defines the cluster to which each client belongs.
     """)
 
+    st.code("selected_customers.loc[:, 'cluster'] = clients_clusters")
     selected_customers.loc[:, 'cluster'] = clients_clusters
 
     st.markdown("""

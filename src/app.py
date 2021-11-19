@@ -37,7 +37,6 @@ from multipage import MultiPage
 import data_preparation # the data cleaning file
 import dataset_overview # the dataset overview File
 import data_modeling # the data modeling File
-import viz_and_com # the visualization and communication file
 import dataset_explorer # dataset explorer
 import intro # introductory page
 
@@ -50,8 +49,7 @@ st.sidebar.markdown("""
 * Explore the DataFrame: Understand what data and the problem
 * Data Preparation: Data Overview & Cleaning
 * Data Preparation: Feature Engineering & Data Transformation
-* Data Modeling: Train the ML Models
-* Visualization and Communication: Deploy and Express the results of the ML models
+* Data Modeling: Train the ML Models, Evaluate them and Interpret the Results
 
 ***Note**: Follow the steps 1 by one to get the results at the end
 """)
@@ -61,8 +59,7 @@ app.add_page("1. Introduction to the Problem and the Domain", intro.app)
 app.add_page("2. Explore The Dataframe", dataset_explorer.app)
 app.add_page("3. Data Preparation: Dataset Overview & Cleaning", dataset_overview.app)
 app.add_page("4. Data Preparation: Feature Engineering", data_preparation.app)
-app.add_page("5. Data Modelling", data_modeling.app)
-app.add_page("6. Visualization and Communication", viz_and_com.app) #maybe this needs to be injected to the previous section and we will see
+app.add_page("5. Data Modelling, Evaluation and Results", data_modeling.app)
 
 # The main app
 app.run()

@@ -14,7 +14,7 @@ def app():
     with col3:
         st.write("")
 
-    st.subheader('Final Project - CEI523 - Data Science')
+    st.subheader('Final Project - CEI523 - Data Science - Report Based Application')
     
     ## FALTA O CHECK ON GITHUB
     st.write("""
@@ -25,11 +25,19 @@ def app():
     - Data Preparation: Dataset Overview & Data Cleaning
     - Data Preparation: Feature Engineering & Data Transformation
     - Data Modeling: Training and evaluationg of the first 10 Months & the Last 2 Months separately. We cannot train the model in the first 10 months and test it in the last 2 months because of seasonality.
-    - Deployment and Communication 
+    - Results: Interpreting the insights from the training and the evaluation
     The prediction are made regarding to the Product Categories which a customer spends money.\n
     All the operations in the dataset were already done and stored as csv files inside the data directory.\n 
     The data are not cached, but they are modified, stored and reloaded\n
     If you want to check the code, go through the notebook directory in the [github repository](https://github.com/christoschr97/streamlit_app_CEI523).
+
+    Methodology:
+    - Explore the dataset
+    - Clean the dataset
+    - Group Products through user description using NLP
+    - Group customers based on how much they spend on each Product Category derived from the previous step
+    - Train 4 classifiers
+    - Evaluate and interpret the results
     """)
 
     st.write("""
