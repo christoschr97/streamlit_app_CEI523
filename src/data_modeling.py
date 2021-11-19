@@ -526,7 +526,6 @@ def app():
     st.dataframe(X_last_period)
     st.write("#### y_First_Period")
     st.dataframe(y_first_period)
-    y_last_period.rename(columns = {0: 'Cluster'}, inplace=True)
     st.write("#### y_last_Period")
     st.dataframe(y_last_period)
     

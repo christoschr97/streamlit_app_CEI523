@@ -28,6 +28,7 @@ from plotly.offline import init_notebook_mode,iplot
 import os
 warnings.filterwarnings("ignore")
 plt.rcParams["patch.force_edgecolor"] = True
+st.set_option('deprecation.showPyplotGlobalUse', False)
 plt.style.use('fivethirtyeight')
 mpl.rc('patch', edgecolor = 'dimgray', linewidth=1)
 

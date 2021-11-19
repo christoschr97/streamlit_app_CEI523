@@ -87,6 +87,14 @@ def app():
   st.code("df.drop_duplicates(inplace=True)")
   df.drop_duplicates(inplace=True)
 
+  ## SEE THE MAX AND MINIMUM DATE ##
+  df_date = pd.DataFrame()
+  df_date['InvoiceDate'] = df['InvoiceDate'].astype('datetime64[ns]')
+  st.write("##### We will check the max and minimum date:")
+  st.code(df.InvoiceDate.max(), df.InvoiceDate.min()) 
+  st.write(df_date.InvoiceDate.max(), df_date.InvoiceDate.min())
+  st.write("**It seems like we have Online Retail Data and Transactions for one whole year**")
+
   ## FEATURE EXPLORATION ##
   st.markdown("#### Explore Columns and Possible Features")
   st.markdown("Lets investigate the orders per country")

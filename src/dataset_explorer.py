@@ -29,8 +29,11 @@ def app():
     st.title('Common ML Dataset Explorer')
     st.subheader('Datasets For ML Explorer with Streamlit')
     st.markdown("""##### This page has 2 sections: 
+
 	1. Dataset Overview: Understanding the dataset
-	2. Dataset Explorer (Interactive)""")
+	2. Dataset Explorer (Interactive): Interact dynamically with the dataset
+    
+    """)
 
     type_of_data = st.radio(
         "Type of Data",
@@ -52,14 +55,26 @@ def app():
 
     st.header('Data Visualization')
 
-    height, width, margin = 450, 1500, 10
+    height, width, margin = 450, 700, 10
 
-    st.subheader('Country Transactions Distribution')
+    # st.subheader('Country Transactions Distribution')
 
     # TODO: GET UNIQUE TRANSACTIONS
+    st.write("##### Transactions per country")
     temp = data.groupby(by=['Country', 'InvoiceNo'], as_index=False)['InvoiceDate'].count()
     temp.rename(columns={"InvoiceDate": "Transactions"}, inplace=True)
     fig = graphs.plot_histogram(data=temp, x='Country', nbins=50, height=height, width=width, margin=margin)
+    st.plotly_chart(fig)
+
+    st.header('Dataframe info: ')
+    columns_info=pd.DataFrame(data.dtypes.astype(str)).T.rename(index={0:'Column Type'})
+    columns_info=columns_info.append(pd.DataFrame(data.isnull().sum()).T.rename(index={0:'Null Values (NB)'}).astype(str))
+    columns_info=columns_info.append(pd.DataFrame(data.isnull().sum()/data.shape[0]*100).T.rename(index={0:'Null Values (%)'}).astype(str))
+    st.write(columns_info)
+
+    st.subheader('Correlation Matrix')
+    corr_matrix = data.corr()
+    fig = graphs.plot_heatmap(corr_matrix=corr_matrix, height=height, margin=margin)
     st.plotly_chart(fig)
 
     st.markdown("""
@@ -160,76 +175,6 @@ def app():
     if st.checkbox('Correlation Plot[Seaborn]'):
         st.write(sns.heatmap(df.corr(), annot=True))
         st.pyplot()
-
-    # Pie Chart
-
-    if st.checkbox('Pie Plot'):
-        all_columns_names = df.columns.tolist()
-        if st.button('Generate Pie Plot'):
-            st.success('Generating A Pie Plot')
-            st.write(df.iloc[:,
-                     -1].value_counts().plot.pie(autopct='%1.1f%%'))
-            st.pyplot()
-
-    # Count Plot
-
-    if st.checkbox('Plot of Value Counts'):
-        st.text('Value Counts By Target')
-        all_columns_names = df.columns.tolist()
-        primary_col = st.selectbox('Primary Columm to GroupBy',
-                                   all_columns_names)
-        selected_columns_names = st.multiselect('Select Columns',
-                all_columns_names)
-        if st.button('Plot'):
-            st.text('Generate Plot')
-            if selected_columns_names:
-                vc_plot = \
-                    df.groupby(primary_col)[selected_columns_names].count()
-            else:
-                vc_plot = df.iloc[:, -1].value_counts()
-            st.write(vc_plot.plot(kind='bar'))
-            st.pyplot()
-
-    # Customizable Plot
-
-    st.subheader('Customizable Plot')
-    all_columns_names = df.columns.tolist()
-    type_of_plot = st.selectbox('Select Type of Plot', [
-        'area',
-        'bar',
-        'line',
-        'hist',
-        'box',
-        'kde',
-        ])
-    selected_columns_names = st.multiselect('Select Columns To Plot',
-            all_columns_names)
-
-    if st.button('Generate Plot'):
-        st.success('Generating Customizable Plot of {} for {}'.format(type_of_plot,
-                   selected_columns_names))
-
-        # Plot By Streamlit
-
-        if type_of_plot == 'area':
-            cust_data = df[selected_columns_names]
-            st.area_chart(cust_data)
-        elif type_of_plot == 'bar':
-
-            cust_data = df[selected_columns_names]
-            st.bar_chart(cust_data)
-        elif type_of_plot == 'line':
-
-            cust_data = df[selected_columns_names]
-            st.line_chart(cust_data)
-        elif type_of_plot:
-
-        # Custom Plot
-
-            cust_plot = \
-                df[selected_columns_names].plot(kind=type_of_plot)
-            st.write(cust_plot)
-            st.pyplot()
 
     if st.button('Thanks'):
         st.balloons()
