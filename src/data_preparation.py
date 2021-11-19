@@ -219,7 +219,8 @@ def app():
     df_products.rename(columns = {0: 'Description'}, inplace=True)
     st.write(df_products)
 
-    st.write("Now lets ")
+    st.write("Now lets get the keywords by running the `bag_of_keywords` function: ")
+    st.code("keywords, keywords_roots, keywords_select, count_keywords = bags_of_keywords(df_products)")
     keywords, keywords_roots, keywords_select, count_keywords = bags_of_keywords(df_products)
 
     st.markdown(""""
@@ -304,33 +305,33 @@ def app():
     ## Now lets add the price range to the matrix X for each description to augment the dataset: 
     Shortly,we will create 5 price ranges (see the visualization of the price above `(pie chart and barchart))` to augment the dataset associated each one_hot_description with the price range
     """)
+    with st.spinner('One-hot-encoding matrix creation in progress: Wait for it...'):
+        threshold = [0, 1, 2, 3, 5, 10]
+        label_col = []
+        for i in range(len(threshold)):
+            if i == len(threshold)-1:
+                col = ' > {}'.format(threshold[i])
+            else:
+                col = '{} < {}'.format(threshold[i],threshold[i+1])
+            label_col.append(col)
+            Word_X_matrix.loc[:, col] = 0
 
-    threshold = [0, 1, 2, 3, 5, 10]
-    label_col = []
-    for i in range(len(threshold)):
-        if i == len(threshold)-1:
-            col = ' > {}'.format(threshold[i])
-        else:
-            col = '{} < {}'.format(threshold[i],threshold[i+1])
-        label_col.append(col)
-        Word_X_matrix.loc[:, col] = 0
+        for i, prod in enumerate(list_descriptions):
+            prix = df_cleaned[ df_cleaned['Description'] == prod]['UnitPrice'].mean()
+            j = 0
+            while prix > threshold[j]:
+                j+=1
+                if j == len(threshold): break
+            Word_X_matrix.loc[i, label_col[j-1]] = 1
 
-    for i, prod in enumerate(list_descriptions):
-        prix = df_cleaned[ df_cleaned['Description'] == prod]['UnitPrice'].mean()
-        j = 0
-        while prix > threshold[j]:
-            j+=1
-            if j == len(threshold): break
-        Word_X_matrix.loc[i, label_col[j-1]] = 1
+        st.write("{:<8} {:<20}\n".format('Range and', 'Count of Products in each price range'))
 
-    st.write("{:<8} {:<20}\n".format('Range and', 'Count of Products in each price range'))
-
-    for i in range(len(threshold)):
-        if i == len(threshold)-1:
-            col = ' > {}'.format(threshold[i])
-        else:
-            col = '{} < {}'.format(threshold[i],threshold[i+1])    
-        st.write("{:<10}  {:<20}".format(col, Word_X_matrix.loc[:, col].sum()))
+        for i in range(len(threshold)):
+            if i == len(threshold)-1:
+                col = ' > {}'.format(threshold[i])
+            else:
+                col = '{} < {}'.format(threshold[i],threshold[i+1])    
+            st.write("{:<10}  {:<20}".format(col, Word_X_matrix.loc[:, col].sum()))
 
     st.write("adding the price range from 1-10 as columns to augment the dataset information (and enhance clustering)")
     st.dataframe(Word_X_matrix.head(5))
@@ -344,8 +345,8 @@ def app():
         silhouette_avg = silhouette_score(Word_X_matrix, clusters)
         print("For n_clusters =", n_clusters, "The average silhouette_score is :", silhouette_avg)
     """)
-    st.markdown("""
-    ResulFor n_clusters = 3 The average silhouette_score is : 0.11142050517146847
+    st.write("""
+    Result for n_clusters = 3 The average silhouette_score is : 0.11142050517146847
     * For n_clusters = 4 The average silhouette_score is : 0.11369426930609004
     * For n_clusters = 5 The average silhouette_score is : 0.15605111618663936
     * For n_clusters = 6 The average silhouette_score is : 0.16591614204472466
@@ -699,7 +700,25 @@ def app():
     merged_df = merged_df.sort_values('sum')
 
     st.markdown("""
-    Finally, W re-organize the content of the dataframe by ordering the different clusters: first, in relation to the amount spent in each product category and then, according to the total amount spent:
+    Finally, We re-organize the content of the dataframe by ordering the different clusters: first, in relation to the amount spent in each product category and then, according to the total amount spent:
+    """)
+
+    st.code("""
+    list_index = []
+    for i in range(5):
+        column = 'Cat_{}'.format(i)
+        list_index.append(merged_df[merged_df[column] > 45].index.values[0])
+
+    list_index_reordered = list_index
+    list_index_reordered += [ s for s in merged_df.index if s not in list_index]
+
+    merged_df = merged_df.reindex(index = list_index_reordered)
+    merged_df = merged_df.reset_index(drop = False)
+    merged_df[['cluster', 'count', 'min', 'max', 'mean', 'sum', 'Cat_0', 'Cat_1', 'Cat_2', 'Cat_3', 'Cat_4', 'size']]
+
+    columns = ['count','min', 'max', 'mean', 'Cat_0', 'Cat_1', 'Cat_2', 'Cat_3', 'Cat_4', 'LastPurchase', 'FirstPurchase']
+    X_fp = selected_customers[columns]
+    Y_fp = selected_customers['cluster']
     """)
 
     list_index = []
@@ -712,9 +731,41 @@ def app():
 
     merged_df = merged_df.reindex(index = list_index_reordered)
     merged_df = merged_df.reset_index(drop = False)
-    display(merged_df[['cluster', 'count', 'min', 'max', 'mean', 'sum', 'Cat_0', 'Cat_1', 'Cat_2', 'Cat_3', 'Cat_4', 'size']])
+    merged_df[['cluster', 'count', 'min', 'max', 'mean', 'sum', 'Cat_0', 'Cat_1', 'Cat_2', 'Cat_3', 'Cat_4', 'size']]
 
     columns = ['count','min', 'max', 'mean', 'Cat_0', 'Cat_1', 'Cat_2', 'Cat_3', 'Cat_4', 'LastPurchase', 'FirstPurchase']
     X_fp = selected_customers[columns]
     Y_fp = selected_customers['cluster']
-    
+
+    st.write("""
+    ##### Now lets see some products of each category to understand what each category buys in combination with the table above
+    """)
+    with st.spinner('Product Lists creation in progress: Wait for it...'):
+
+        list_products_cat_0 = []
+        list_products_cat_1 = []
+        list_products_cat_2 = []
+        list_products_cat_3 = []
+        list_products_cat_4 = []
+        for index, row in df_cleaned.iterrows():
+            if row['Product_Category'] == 0:
+                list_products_cat_0.append([row['Description'], row['StockCode']])
+            if row['Product_Category'] == 1:
+                list_products_cat_1.append([row['Description'], row['StockCode']])
+            if row['Product_Category'] == 2:
+                list_products_cat_2.append([row['Description'], row['StockCode']])
+            if row['Product_Category'] == 3:
+                list_products_cat_3.append([row['Description'], row['StockCode']])
+            if row['Product_Category'] == 4:
+                list_products_cat_4.append([row['Description'], row['StockCode']])
+
+        st.write("**Cat_0 Sample of 3 products:**")
+        st.write(list_products_cat_0[:3])
+        st.write("**Cat_1 Sample of 3 products:**")
+        st.write(list_products_cat_1[:3])
+        st.write("**Cat_2 Sample of 3 products:**")
+        st.write(list_products_cat_2[:3])
+        st.write("**Cat_3 Sample of 3 products:**")
+        st.write(list_products_cat_3[:3])
+        st.write("**Cat_4 Sample of 3 products:**")
+        st.write(list_products_cat_4[:3])
