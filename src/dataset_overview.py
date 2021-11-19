@@ -54,14 +54,17 @@ def app():
       there are several ways to deal with missing values:
 
       Impute values for the CustomerID and Description, in this case it is impossible, does not make sense.
-
-      Apply clustering analysis and see patterns in those unknown clients and unknown description of products. Once these patterns are detected we can assign a labels for them and use these labels as a generic CustomerID and Description.
+      
+      Once these patterns are detected we can assign a labels for them and use these labels as a generic CustomerID and Description.
       Delete the rows where these missing values are found.
+
+      Our goal is to apply clustering analysis and see patterns in those unknown clients and unknown description of products. 
   """)
 
   st.write("##### By utilizing the code below we can drop the rows where the customer is NaN and thus we cannot utilize them in our project")
 
   st.code("df.dropna(axis = 0, subset = ['CustomerID'], inplace = True")
+
   df.dropna(axis = 0, subset = ['CustomerID'], inplace = True)
 
   st.write("Now we have cleared the missing values of Customer ID lets see again whats happening")
@@ -178,7 +181,7 @@ def app():
   st.pyplot(fig=fig)
 
   st.write("""
-  ##### As we can see the majority of canceled orders are big so we cannot just drop them
+  ##### As we can see the proportion of canceled orders are big so we cannot just drop them
   - We will find the cancel orders if they have counterparts and drop them
   - We will drop also the negative quantities
   - We will recheck the df if any negative quantity remains
@@ -293,9 +296,10 @@ def app():
   df = get_data_cleaned()
 
   st.markdown("""
-  From the describe() above we can see that we still have negative values. Lets remove the stockcodes that are not casual transactions and then come back again to recheck everything
-  **Now lets remove rows that dont have to do with customers (like discounts or manual added entries)**
-  We can find them by getting all the stockcodes that are different We need a way to filter stockcodes that differ from the casual
+  From the describe() above we can see that we still have negative values. Lets remove the stockcodes that are not casual transactions and then come back again to recheck everything.
+  \n
+  **Now lets remove rows that dont have to do with customers (like discounts or manual added entries).**
+  We can find them by getting all the stockcodes that are different We need a way to filter stockcodes that differ from the casual.
   """)
 
   st.write("Remove also the special stockcodes: ".format(df[df['StockCode'].str.contains('^[a-zA-Z]+', regex=True)]['StockCode'].unique()))
@@ -322,7 +326,7 @@ def app():
   st.dataframe(df.describe())
 
   st.markdown("""
-  Now lets check the dataframe again: Seems Like we have a final dataset with 393374 rows
+  **After Cleaning**: Seems Like we have a final dataset with 393374 rows
   """)
 
   df_cleaned = get_data_cleaned()

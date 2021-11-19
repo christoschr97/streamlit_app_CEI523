@@ -165,7 +165,9 @@ def app():
 
     What does the dataset tell us of its products?
     What we are going to do is to explore the content of the column Description in order to group the products into different categories
-    This is going to be very excited and tricky. First we declared a variable that holds a `lambda` function called `is_noun()`, what it does is to check if from index 0 and 1 are considered `'NN'`, we are going to understand what this does and what its purpose is for our object of understanding the `Description` column.
+    This is going to be very excited and tricky. 
+    - We will use one hot representation to create the `word_X_matrix` which sill contain for each description the one hot representation using bag of words technique.
+    - we are going to understand what this does and what its purpose is for our object of understanding the `Description` column.
     """)
 
     is_noun = lambda pos: pos[:2] == 'NN'
@@ -271,15 +273,9 @@ def app():
     st.markdown("""
     ## Defining Product Categories
 
-    The keywords list contains 1484 keywords and the most frequent ones appear in more than 200 products. 
-    When examinating the content of this list, we can notice that some names are useless, do not carry information. 
+    The keywords list contains 1473 keywords and the most frequent ones appear in more than 200 products. 
+    When examinating the content of this list, we can notice that some names are useless, do not carry information. We will drop them such as stopwords, color keywords etc. 
     Therefore we should discard these words from the analysis that follows and also let's consider only the words that appear more than 15 times.
-
-    Let's create the list list_products. After we iterate through the items in the dictionary count_keywords:
-    * We create the var word, we assign the value of the keyword of keywords_select[k].
-    * If the word from word var/list is in this group ['pink', 'blue', 'tag', 'green', 'orange'] thkeywords_selectroducts
-    list_product_keywords.sort(key = lambda x:x[1], reverse = True)
-    print('Number of words that were kept:', len(list_product_keywords))
     """)
 
     list_product_keywords = return_list_of_products(count_keywords=count_keywords, keywords_select=keywords_select)
@@ -303,7 +299,7 @@ def app():
 
     st.markdown("""
     ## Now lets add the price range to the matrix X for each description to augment the dataset: 
-    Shortly,we will create 5 price ranges (see the visualization of the price above `(pie chart and barchart))` to augment the dataset associated each one_hot_description with the price range
+    Shortly, we will create 5 price ranges (see the visualization of the price above `(pie chart and barchart))` to augment the dataset associated each one_hot_description with the price range
     """)
     with st.spinner('One-hot-encoding matrix creation in progress: Wait for it...'):
         threshold = [0, 1, 2, 3, 5, 10]
@@ -338,6 +334,9 @@ def app():
 
     st.markdown("## Now we are going to use KModes to create clusters of products")
     st.markdown("###### By running the code bellow we conclude to use 5 clusters for products:")
+    st.markdown("""
+    We use silhouette analysis to determine how many cluster we will use: https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+    """)
     st.code("""
     for n_clusters in range(3,10):
         kmodes = KModes(init='Huang', max_iter=100, n_clusters=n_clusters, n_init=30, n_jobs=-1, random_state=42)
@@ -349,8 +348,8 @@ def app():
     Result for n_clusters = 3 The average silhouette_score is : 0.11142050517146847
     * For n_clusters = 4 The average silhouette_score is : 0.11369426930609004
     * For n_clusters = 5 The average silhouette_score is : 0.15605111618663936
-    * For n_clusters = 6 The average silhouette_score is : 0.16591614204472466
-    * For n_clusters = 7 The average silhouette_score is : 0.16497509597519985
+    * For n_clusters = 6 The average silhouette_score is : 0.15591614204472466
+    * For n_clusters = 7 The average silhouette_score is : 0.15497509597519985
     * For n_clusters = 8 The average silhouette_score is : 0.12549958008303969
     * For n_clusters = 9 The average silhouette_score is : 0.13722223664399463
     """)
@@ -417,11 +416,10 @@ def app():
 
     st.markdown("""
     ## Now we have clusters of products Lets create customer categories:
-
-    We will create the categories for our customers, but first we need to give some proper format to some data.
-    As we already grouped our products into five different clusters we must incorporate this information into the dataframe, we are going to create a new column/feature called Product_Category and it will hold the cluster of each product.
-    We create product_category dictionary, we iterate trough zipping list_descriptions and clusters as key for descriptions from list_descriptions and val for the number of cluster from clusters, then we assign to product_category[key] the value of val.
-    product_category will have the descriptions and to what cluster they belong.
+    - We will create the categories for our customers, but first we need to give some proper format to some data.
+    - As we already grouped our products into five different clusters we must incorporate this information into the dataframe, we are going to create a new column/feature called Product_Category and it will hold the cluster of each product.
+    - We create product_category dictionary, we iterate trough zipping list_descriptions and clusters as key for descriptions from list_descriptions and val for the number of cluster from clusters, then we assign to product_category[key] the value of val.
+    - product_category will have the descriptions and to what cluster they belong.
     """)
 
     product_category = dict()
@@ -438,9 +436,9 @@ def app():
     st.dataframe(df_cleaned.sample(5))
 
     st.markdown("""
-    Cool! We now have every transaction and its category.
-    `Grouping the Products`
-    Good! Let's create a `Cat_N` variables (with  $N$ $∈$ $[0:4]$ ) that contains the amount spent in each product category.
+    We now have every transaction and its category.
+    - `Grouping the Products`
+    - Let's create a `Cat_N` variables (with  $N$ $∈$ $[0:4]$ ) that contains the amount spent in each product category.
     """)
 
     st.markdown("""
@@ -460,12 +458,22 @@ def app():
     st.markdown("""
     Now we create a temporal DataFrame object temp, in this new temporal dataframe we are going to hold the TotalPrice sum grouped by CustomerID and InvoiceNo, then we are going to assign to cart_price the values from temp.
     """)
-
+    st.code("""
+    temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['TotalPrice'].sum()
+    cart_price = temp.rename(columns = {'TotalPrice':'Cart Price'})
+    """)
     temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)['TotalPrice'].sum()
     cart_price = temp.rename(columns = {'TotalPrice':'Cart Price'})
 
     st.markdown("""
     Then we iterate in a `for` loop a range of `5` iterations with `i` as iterator index, inside this loop we first assign to the var `col` the name of the column `Cat_{i}`, then we assign to `temp` the result from grouping `CustomerID` and `InvoiceNo` and the sum of `col`, then we assign to `cart_price` in the column `col` the values in `temp`. 
+    """)
+
+    st.code("""
+        for i in range(5):
+        col = 'Cat_{}'.format(i) 
+        temp = df_cleaned.groupby(by=['CustomerID', 'InvoiceNo'], as_index=False)[col].sum()
+        cart_price.loc[:, col] = temp
     """)
 
     for i in range(5):
@@ -497,8 +505,11 @@ def app():
     st.markdown("""
     ### Taking Care of Data Over Time
     We have to remember (see code bellow) that we have data from 1 exact year. 
-    * The main objectives of this notebook is to develop a model capable of characterizing and anticipating the habits of the customers visiting the site from their first visit. 
-    * How can we test the model in a realistic way?, We can split the dataset by keeping the first 10 months for training and development of the model and the last two months for testing how good our model is. Nice approach? Now let's define a var date_limit which is going to work as the limit day for comparison.
+    * The main objectives of this notebook is to develop a model to characterizing and anticipating the habits of the customers visiting the online retail from their first visit. 
+    * How can we test the model in a realistic way?, We can split the dataset by keeping the first 10 months for training, development and testing of the model and do the last two months the same way in order to see if there are not any differences among the evaluations scores it means that we are good. 
+    * Now let's define a var date_limit which is going to work as the limit day for comparison.
+    * The reasons is because we cannot train the model in the first ten months and test it with the last 2 months because we will lose seasonality. 
+    * Additionally we have to mention that we experiment to test with the last 2 months the model trained with the first 10 months and it was preforming very bad
     """)
 
     st.code("""
@@ -515,8 +526,14 @@ def app():
     date_limit
 
     st.markdown("""
+    ### As we mentioned above we will train 
     train_set: data from cart_price that was registered before the date 2011-10-1 and
-    test_set: data from cart_price that was registered during and after the date 2011-10-1. Then we copy all the data from train_set to cart_price.
+    test_set: data from cart_price that was registered during and after the date 2011-10-1.
+    """)
+
+    st.code("""
+    train_set = cart_price[cart_price['InvoiceDate'] < date_limit]
+    test_set = cart_price[cart_price['InvoiceDate'] >= date_limit]
     """)
 
     train_set = cart_price[cart_price['InvoiceDate'] < date_limit]
@@ -530,8 +547,9 @@ def app():
     st.dataframe(test_set.head(5))
 
     st.markdown("""
-    Then we create the DataFrame object transactions_per_user, in this new dataframe we assign the values of count, min, max, mean and sum from gruping by CustomerID and Cart Price. The information on transactions_per_user is just basic statistics of the values found in the Cart Price of each customer.
+    Then we create the DataFrame object `transactions_per_user`, in this new dataframe we assign the values of count, min, max, mean and sum from gruping by CustomerID and Cart Price. The information on transactions_per_user is just basic statistics of the values found in the Cart Price of each customer.
     """)
+
     transactions_per_user=cart_price.groupby(by=['CustomerID'])['Cart Price'].agg(['count','min','max','mean','sum'])
     st.dataframe(transactions_per_user)
 
@@ -542,7 +560,8 @@ def app():
     st.dataframe(transactions_per_user.head(5))
 
     st.markdown("""
-    We reset the index of transactions_per_user, we group cart_price dataframe by CustomerID and sum the values from Category_0 column, therefore cart_price will have how much each customer has bought in Category_0, last we sort transactions_per_user by ascending order according to CustomerID values, we display the first 5 samples of transactions_per_user sorted.
+    * We group cart_price dataframe by CustomerID and sum the values from Category_0 column.
+    * Therefore cart_price will have how much each customer has bought in Category_0.
     """)
 
     transactions_per_user.reset_index(drop=False, inplace=True)
@@ -550,7 +569,7 @@ def app():
     st.dataframe(transactions_per_user.sort_values('CustomerID', ascending=True).head(5))
 
     st.markdown("""
-    We are almost done! Let's define two additional columns for the number of days elapsed since the first purchase ( FirstPurchase ) and the number of days since the last purchase ( LastPurchase ):
+    Lets define two additional columns for the number of days elapsed since the first purchase ( FirstPurchase ) and the number of days since the last purchase ( LastPurchase ):
 
     We take in last_date the maximun date on InvoiceDate from cart_price.
     """)
@@ -559,7 +578,7 @@ def app():
     st.write("Last date: {}".format(last_date))
 
     st.markdown("""
-    Let's create the next dataframes first_registration for the first date that a customer made a transaction, this is done through grouping by CustomerID and taking the minimun date from InvoiceDate and for last_purchase dataframe we take the last date that a customer made a transaction, this is done through grouping by CustomerID and taking the maximum date from InvoiceDate.
+    Let's create the next dataframes `first_registration` for the first date that a customer made a transaction, this is done through grouping by CustomerID and taking the minimun date from InvoiceDate and for last_purchase dataframe we take the last date that a customer made a transaction, this is done through grouping by CustomerID and taking the maximum date from InvoiceDate.
     """)
 
     st.code("""
@@ -569,6 +588,8 @@ def app():
 
     first_registration = pd.DataFrame(cart_price.groupby(by=['CustomerID'])['InvoiceDate'].min())
     last_purchase      = pd.DataFrame(cart_price.groupby(by=['CustomerID'])['InvoiceDate'].max())
+    st.dataframe(first_registration.head())
+    st.dataframe(last_purchase.head())
 
     st.markdown("""
     We have seen what info do first_registration and last_purchase are holding, now we are going to calculate how many days have passed, this is done by creating two separete dataframe, one for first_registration and last_purchase.
@@ -586,9 +607,9 @@ def app():
     test_lp = last_purchase.applymap(lambda x:(last_date - x.date()).days)
 
     st.markdown("""
-    We are going to create new columns for transactions_per_user, one column called FirstPurchase and other column named LastPurchase.
+    We are going to create new columns for transactions_per_user, one column called `FirstPurchase` and other column named `LastPurchase`.
 
-    FirstPurchase: is going to take the values from test_fp, we do not reset its index, this will match the CustomerID in transactions_per_user. LastPurchase: is going to take the values from test_lp, we do not reset its index, this will match the CustomerID in transactions_per_user.
+    `FirstPurchase`: is going to take the values from test_fp, we do not reset its index, this will match the CustomerID in transactions_per_user. `LastPurchase`: is going to take the values from test_lp, we do not reset its index, this will match the CustomerID in transactions_per_user.
     """)
 
     st.code("""
@@ -624,11 +645,13 @@ def app():
     #### Creation of Customer Categories
 
     Well it is the time we all have been waiting, the creation of this clusters will be done by using KMeans, it is a very similar process as the one we did with creating the clusters for words with KModes.
+    \n
     This may take a while!
+    \n
     The best number of clusters will be defined by the technique Elbow Method.
     """)
 
-    st.write("Run the code bellow to find the best K using k-means")
+    st.write("Run the code bellow to find the best K using k-means (we cannot run it in streamlit because we used the go Figure)")
     st.code("""
     for n_clusters in range(1, 21):
         kmeans = KMeans(init='k-means++', max_iter=100, n_clusters=n_clusters, n_init=100, random_state=42).fit(minmaxscaled_matrix)
@@ -650,8 +673,9 @@ def app():
     )
     fig.show()
     """)
+    
     st.write("""
-    Looks like 14 clusters is the right value for n_clusters
+    ##### After experimenting with the clusters we conclude that 14 clusters is the right value for n_clusters
     """)
 
     with st.spinner('Clustering - Grouping Cutomers: Wait for it...'):
@@ -678,14 +702,17 @@ def app():
     graph_component_silhouette(n_clusters, [-0.15, 0.55], len(minmaxscaled_matrix), sample_silhouette_values, clients_clusters)
 
     st.markdown("""
-    Some of the clusters are indeed disjoint (at least, in a global way). It remains to understand the habits of the customers in each cluster. To do so, we start by adding to the selected_customers dataframe a variable that defines the cluster to which each client belongs.
+    * Some of the clusters are indeed disjoint. It remains to understand the habits of the customers in each cluster. 
+    * To do so, we start by adding to the selected_customers dataframe a variable that defines the cluster to which each client belongs.
     """)
 
     st.code("selected_customers.loc[:, 'cluster'] = clients_clusters")
     selected_customers.loc[:, 'cluster'] = clients_clusters
 
     st.markdown("""
-    Then, We average the contents of this dataframe by first selecting the different groups of clients. This gives access to, for example, the average cart price, the number of visits or the total sums spent by the clients of the different clusters. I also determine the number of clients in each group (variable size ):
+    * Then, We average the contents of this dataframe by first selecting the different groups of clients. 
+    * This gives access to, for example, the average cart price, the number of visits or the total sums spent by the clients of the different clusters. 
+    * We also determine the number of clients in each group (variable size ):
     """)
 
     merged_df = pd.DataFrame()
@@ -701,7 +728,8 @@ def app():
     merged_df = merged_df.sort_values('sum')
 
     st.markdown("""
-    Finally, We re-organize the content of the dataframe by ordering the different clusters: first, in relation to the amount spent in each product category and then, according to the total amount spent:
+    * Finally, We re-organize the content of the dataframe by ordering the different clusters: 
+    * First, in relation to the amount spent in each product category and then, according to the total amount spent:
     """)
 
     st.code("""
