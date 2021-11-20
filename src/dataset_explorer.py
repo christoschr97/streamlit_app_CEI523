@@ -147,18 +147,7 @@ def app():
         all_columns = df.columns.tolist()
         selected_columns = st.multiselect('Select', all_columns)
         new_df = df[selected_columns]
-        st.dataframe(new_df)
-
-    # Show Values
-
-    if st.button('Value Counts'):
-        st.text('Value Counts By Target/Class')
-        st.write(df.iloc[:, -1].value_counts())
-
-    # Show Datatypes
-
-    if st.button('Data Types'):
-        st.write(df.dtypes)
+        st.dataframe(new_df.head())
 
     # Show Summary
 
@@ -175,6 +164,3 @@ def app():
     if st.checkbox('Correlation Plot[Seaborn]'):
         st.write(sns.heatmap(df.corr(), annot=True))
         st.pyplot()
-
-    if st.button('Thanks'):
-        st.balloons()
